@@ -1,0 +1,10 @@
+
+2011-02-01  bowbow99  <bowbow99@gmail.com>
+	* 途中までテスト書いた
+	* `typep` を再実装
+	- `deftype` で定義された typespec も使えるように
+	- 型チェックする方法が見つからんかった場合に警告するように
+	* `optimize-typep` を実装
+
+2011-01-30  bowbow99  <bowbow99@gmail.com>
+	* 始めました
