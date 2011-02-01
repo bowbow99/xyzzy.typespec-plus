@@ -157,8 +157,8 @@ object".
 ;;;;
 ;;;; * Optimize `typep` form
 
-
 (defun optimize-typep (form)
+  "Take a `typep` form and return a form that do same thing but in more efficiently."
   (unless (and (consp form)
                (eq (car form) 'typep)
                (= (length form) 3))
@@ -187,8 +187,6 @@ object".
              (optimize-typep `(typep ,object-form ,(si:canonicalize-type typespec))))
             (t form))))
       form)))
-
-
 
 
 ;;; typespec+.l ends here.
