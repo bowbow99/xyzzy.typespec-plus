@@ -1,3 +1,11 @@
+2011-02-03  bowbow99  <bowbow99@gmail.com>
+	* typep optimizer なるものを実装
+	- `(typep OBJECT (TYPE . ARGS))` の OBJECT と ARGS から適当な別の
+	  式に変換するもの
+	- `si::defpred` で定義された型（`and` など）は OBJECT と ARGS を
+	  受け取る関数になってしまってるので、式変形で関数呼び出しを避け
+	  られるような場合に有効なはず
+	* ベンチマーク書いた
 
 2011-02-01  bowbow99  <bowbow99@gmail.com>
 	* 途中までテスト書いた
