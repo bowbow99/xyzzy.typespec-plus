@@ -157,6 +157,12 @@ object".
 ;;;;
 ;;;; * Optimize `typep` form
 
+(defparameter *typep-optimizer-table* (make-hash-table))
+
+(defmacro define-typep-optimizer (name (&rest args) &body body)
+  `(setf (gethash ',name *typep-optimizer-table*)
+         (lambda (,@args) (block ,name ,@body))))
+
 (defun optimize-typep (form)
   "Take a `typep` form and return a form that do same thing but in more efficiently."
   (unless (and (consp form)
@@ -174,6 +180,8 @@ object".
               (values (car typespec) (cdr typespec))
               (values typespec nil))
           (acond
+            ((gethash type *typep-optimizer-table*)
+             (apply it object-form args))
             ((get type 'si::type-predicate)
              (list it object-form))
             ((get type 'si::type-specifier-list)
