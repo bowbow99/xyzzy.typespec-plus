@@ -6,6 +6,7 @@
 ;;; Code:
 
 (require "lisp-unit")
+(require "typespec+")
 
 (defpackage :test.typep
   (:use :lisp :lisp-unit :typespec+))
