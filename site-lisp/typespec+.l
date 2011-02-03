@@ -239,22 +239,26 @@ object".
 
 ;;; Numbers
 
-(defun expand-number% (object predicate low high)
-  `(*let (#1=#:number ,object)
-     (*and (,predicate #1#)
-           ,@(cond ((both low high #'null) '(t))
-                   ((both low high #'numberp) `((<= ,low #1# ,high)))
-                   ((both low high #'consp) `((< ,(car low) #1# ,(car high))))
-                   (t `(,(cond ((null low) t)
-                               ((numberp low) `(<= ,low #1#))
-                               ((consp low) `(< ,(car low) #1#)))
-                        ,(cond ((null high) t)
-                               ((numberp high) `(<= #1# ,high))
-                               ((consp high) `(< #1# ,(car high))))))))))
+(defun expand-number-range-check (object low high)
+  (cond ((both low high #'(lambda (x) (eql x '*)))
+         '(t))
+        ((both low high #'numberp)
+         `((<= ,low ,object ,high)))
+        ((both low high #'consp) ; should be a singleton list of number
+         `((< ,(car low) ,object ,(car high))))
+        (t
+         `(,(cond ((null low)     t)
+                  ((numberp low)  `(<= ,low ,object))
+                  ((consp low)    `(< ,(car low) ,object)))
+           ,(cond ((null high)    t)
+                  ((numberp high) `(<= ,object ,high))
+                  ((consp high)   `(< ,object ,(car high))))))))
 
-(defmacro defopt-number (name pred)
+(defmacro defopt-number (name predicate)
   `(define-typep-optimizer ,name (object &optional (low '*) (high '*))
-     (expand-number% object ',pred (if (eql low '*) nil low) (if (eql high '*) nil high))))
+     `(*let (#1=#:object ,object)
+        (*and (,',predicate #1#)
+              ,@(expand-number-range-check '#1# low high)))))
 
 (defopt-number integer integerp)
 (defopt-number float floatp)
