@@ -68,6 +68,19 @@
 #+xyzzy
 (setf (get 'acond 'ed:lisp-indent-hook) 0)
 
+(defun single? (object)
+  (and (consp object) (null (cdr object))))
+
+(defmacro *let ((var object) &body body)
+  (if (or (symbolp object)
+          (constantp object))
+    (labels ((rec (form)
+               (cond ((eql form var) object)
+                     ((atom form) form)
+                     (t (cons (rec (car form))
+                              (rec (cdr form)))))))
+      (if (single? body) (rec (car body)) `(progn ,@(mapcar #'rec body))))
+    `(let ((,var ,object)) ,@body)))
 
 ;;;;
 ;;;; * Funciton typep
@@ -163,12 +176,9 @@ object".
   `(setf (gethash ',name *typep-optimizer-table*)
          (lambda (,@args) (block ,name ,@body))))
 
+
 ;;; typespecs defined via `defpred` in lisp/typespec.l has their predicate
 ;;; function, but can be transformed into more straightforward form.
-
-;;; TODO: Resulting form of some of optimizer uses `let` to make sure that
-;;; OBJECT-FORM get evaluated only once. This can be avoided if it is safe
-;;; to evaluate OBJECT-FORM more than once.
 
 ;; t, nil
 (define-typep-optimizer t   (object) t)
@@ -193,7 +203,7 @@ object".
 ;; and
 (define-typep-optimizer and (object &rest typespecs)
   (if (null typespecs) t
-    `(let ((#1=#:object ,object))
+    `(*let (#1=#:obj ,object)
        (and ,@(mapcar (lambda (typespec)
                         (optimize-typep `(typep #1# ',typespec)))
                 typespecs)))))
@@ -201,7 +211,7 @@ object".
 ;; or
 (define-typep-optimizer or (object &rest typespecs)
   (if (null typespecs) nil
-    `(let ((#1=#:object ,object))
+    `(*let (#1=#:obj ,object)
        (or ,@(mapcar (lambda (typespec)
                        (optimize-typep `(typep #1# ',typespec)))
                typespecs)))))
