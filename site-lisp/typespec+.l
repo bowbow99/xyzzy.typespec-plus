@@ -82,6 +82,17 @@
       (if (single? body) (rec (car body)) `(progn ,@(mapcar #'rec body))))
     `(let ((,var ,object)) ,@body)))
 
+(defun optimize-and-form (form)
+  (unless (and (consp form)
+               (eql (car form) 'and))
+    (error "malformed `and` form: ~S" form))
+  (let ((args (remove-if (lambda (x) (and (constantp x) x)) (cdr form))))
+    (if (single? args) (car args) `(and ,@args))))
+
+
+(defun both (a b &optional (pred #'identity))
+  (and (funcall pred a) (funcall pred b)))
+
 ;;;;
 ;;;; * Funciton typep
 #|
@@ -218,15 +229,41 @@ object".
 
 ;; standard-char
 ;; extended-character
+;;; Numbers
 
-;; integer
-;; float
-;; rational
-;; short-float
-;; single-float
-;; double-float
-;; long-float
+(defun expand-number% (object predicate low high)
+  `(*let (#1=#:number ,object)
+     ,(optimize-and-form
+       `(and (,predicate #1#)
+             ,@(cond ((both low high #'null) '(t))
+                     ((both low high #'numberp) `((<= ,low #1# ,high)))
+                     ((both low high #'consp) `((< ,(car low) #1# ,(car high))))
+                     (t `(,(cond ((null low) t)
+                                 ((numberp low) `(<= ,low #1#))
+                                 ((consp low) `(< ,(car low) #1#)))
+                          ,(cond ((null high) t)
+                                 ((numberp high) `(<= #1# ,high))
+                                 ((consp high) `(< #1# ,(car high)))))))))))
+
+(defmacro defopt-number (name pred)
+  `(define-typep-optimizer ,name (object &optional (low '*) (high '*))
+     (expand-number% object ',pred (if (eql low '*) nil low) (if (eql high '*) nil high))))
+
+(defopt-number integer integerp)
+(defopt-number float floatp)
+(defopt-number rational rationalp)
+(defopt-number short-float short-float-p)
+(defopt-number single-float single-float-p)
+(defopt-number long-float long-float-p)
+(defopt-number double-float double-float-p)
+
 ;; complex
+(define-typep-optimizer complex (object &optional (typespec '*))
+  `(*let (#1=#:object ,object)
+     ,(optimize-and-form
+       `(and (complexp #1#)
+             ,(if (eql typespec '*) t
+                (optimize-typep `(typep (realpart #1#) ',typespec)))))))
 
 ;; simple-vector
 ;; simple-string
