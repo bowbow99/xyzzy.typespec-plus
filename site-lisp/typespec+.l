@@ -163,6 +163,67 @@ object".
   `(setf (gethash ',name *typep-optimizer-table*)
          (lambda (,@args) (block ,name ,@body))))
 
+;;; typespecs defined via `defpred` in lisp/typespec.l has their predicate
+;;; function, but can be transformed into more straightforward form.
+
+;;; TODO: Resulting form of some of optimizer uses `let` to make sure that
+;;; OBJECT-FORM get evaluated only once. This can be avoided if it is safe
+;;; to evaluate OBJECT-FORM more than once.
+
+;; t, nil
+(define-typep-optimizer t   (object) t)
+(define-typep-optimizer nil (object) nil)
+
+;; satisfies
+(define-typep-optimizer satisfies (object pred)
+  `(,pred ,object))
+
+;; member
+(define-typep-optimizer member (object &rest items)
+  `(member ,object '(,@items) :test #'eql))
+
+;; eql
+(define-typep-optimizer eql (actual expected)
+  `(eql ,actual ,expected))
+
+;; not
+(define-typep-optimizer not (object typespec)
+  `(not ,(optimize-typep `(typep ,object ',typespec))))
+
+;; and
+(define-typep-optimizer and (object &rest typespecs)
+  (if (null typespecs) t
+    `(let ((#1=#:object ,object))
+       (and ,@(mapcar (lambda (typespec)
+                        (optimize-typep `(typep #1# ',typespec)))
+                typespecs)))))
+
+;; or
+(define-typep-optimizer or (object &rest typespecs)
+  (if (null typespecs) nil
+    `(let ((#1=#:object ,object))
+       (or ,@(mapcar (lambda (typespec)
+                       (optimize-typep `(typep #1# ',typespec)))
+               typespecs)))))
+
+;; standard-char
+;; extended-character
+
+;; integer
+;; float
+;; rational
+;; short-float
+;; single-float
+;; double-float
+;; long-float
+;; complex
+
+;; simple-vector
+;; simple-string
+;; string
+;; simple-array
+;; array
+
 (defun optimize-typep (form)
   "Take a `typep` form and return a form that do same thing but in more efficiently."
   (unless (and (consp form)
