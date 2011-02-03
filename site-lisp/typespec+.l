@@ -228,7 +228,16 @@ object".
                typespecs)))))
 
 ;; standard-char
+(define-typep-optimizer standard-char (object)
+  `(*let (#1=#:object ,object)
+     (and (characterp #1#)
+          (standard-char-p #1#))))
+
 ;; extended-character
+(define-typep-optimizer extended-character (object)
+  nil)
+
+
 ;;; Numbers
 
 (defun expand-number% (object predicate low high)
