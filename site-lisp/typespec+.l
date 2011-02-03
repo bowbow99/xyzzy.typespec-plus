@@ -272,11 +272,68 @@ object".
              (optimize-typep `(typep (realpart #1#) ',typespec))))))
 
 
-;; simple-vector
-;; simple-string
-;; string
-;; simple-array
-;; array
+;;; Arrays
+
+(defun expand-array-element-type-check (object element-type)
+  (if (eql element-type '*) t
+    `(eql (array-element-type ,object)
+          ',(upgraded-array-element-type element-type))))
+
+(defun expand-array-dimension-check (object dimension-spec)
+  (cond ((eql dimension-spec '*) nil)
+        ((atom dimension-spec) `((= (array-rank ,object) ,dimension-spec)))
+        (t `((= (array-rank ,object) ,(length dimension-spec))
+             ,@(loop for n in dimension-spec
+                     for i = 0 then (1+ i)
+                 collect (if (eql n '*) t
+                           `(= (array-dimension object ,i) ,n)))))))
+
+(defun expand-vector-size-check (object size)
+  (if (eql size '*) t
+    `(= (array-dimension ,object 0) ,size)))
+
+;; array [element-type] [dimension-spec]
+(define-typep-optimizer array (object &optional (element-type '*) (dimension-spec '*))
+  `(*let (#1=#:object ,object)
+     (*and (arrayp #1#)
+           ,(expand-array-element-type-check '#1# element-type)
+           ,(expand-array-dimension-check '#1# dimension-spec))))
+
+;; simple-array [element-type] [dimension-spec]
+(define-typep-optimizer simple-array (object &optional (element-type '*) (dimension-spec '*))
+  `(*let (#1=#:object ,object)
+     (*and (si:*simple-array-p #1#)
+           ,(expand-array-element-type-check '#1# element-type)
+           ,(expand-array-dimension-check '#1# dimension-spec))))
+
+;; vector [element-type] [size]
+(define-typep-optimizer vector (object &optional (element-type '*) (size '*))
+  `(*let (#1=#:object ,object)
+     (*and (vectorp #1#)
+           ,(expand-array-element-type-check '#1# element-type)
+           ,(expand-vector-size-check '#1# size))))
+
+;; simple-vector [size]
+(define-typep-optimizer simple-vector (object &optional (size '*))
+  `(*let (#1=#:object ,object)
+     (*and (simple-vector-p #1#)
+           ;,(expand-array-element-type-check '#1# t) ; `simple-vector-p` should doing this check
+           ,(expand-vector-size-check '#1# size))))
+
+;; string [size]
+(define-typep-optimizer string (object &optional (size '*))
+  `(*let (#1=#:object ,object)
+     (*and (stringp #1#)
+           ,(expand-vector-size-check '#1# size))))
+
+;; simple-string [size]
+(define-typep-optimizer simple-string (object &optional (size '*))
+  `(*let (#1=#:object ,object)
+     (*and (simple-string-p #1#)
+           ,(expand-vector-size-check '#1# size))))
+
+
+;;; * Function optimize-typep
 
 (defun optimize-typep (form)
   "Take a `typep` form and return a form that do same thing but in more efficiently."
