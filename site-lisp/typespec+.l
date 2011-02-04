@@ -12,6 +12,9 @@
 
 ;;; Code:
 
+(eval-when (:load-toplevel :compile-toplevel :execute)
+  (require "cmu_loop"))
+
 (defpackage :typespec+
   (:use :lisp))
 
