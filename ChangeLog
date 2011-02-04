@@ -1,3 +1,11 @@
+2011-02-04  bowbow99  <bowbow99@gmail.com>
+	* typep optimizer 必要そうなの全部実装
+	- lisp/typespec.l で `defpred` されてるもの
+	* `optimize-typep` から `optimize-typep-1` を分離
+	- object-form と typespec から最適化した式を返す部分を単独で使え
+	  るように
+	* typespec から predicate function を作る `typepred` を実装
+
 2011-02-03  bowbow99  <bowbow99@gmail.com>
 	* typep optimizer なるものを実装
 	- `(typep OBJECT (TYPE . ARGS))` の OBJECT と ARGS から適当な別の
