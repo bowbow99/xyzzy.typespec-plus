@@ -364,7 +364,7 @@ object".
     (acond
       ((gethash type *typep-optimizer-table*)
        (apply it object-form args))
-      ((get type 'si::type-perdicate)
+      ((get type 'si::type-predicate)
        `(,it ,object-form))
       ((get type 'si::type-specifier-list)
        `(,it ,object-form '(,@args)))
