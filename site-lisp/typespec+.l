@@ -391,4 +391,5 @@ OBJECT is type of TYPESPEC."
      (t
       (coerce `(lambda (x) ,form) 'function)))))
 
+(provide "typespec+")
 ;;; typespec+.l ends here.
