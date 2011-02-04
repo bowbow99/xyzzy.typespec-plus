@@ -20,7 +20,8 @@
 (defconstant +original-typep-function+ #'typep)
 
 (export '(+original-typep-function+
-          optimize-typep))
+          optimize-typep
+          optimize-typep-1))
 
 
 #| Original Definition of `typep`
