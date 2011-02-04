@@ -22,8 +22,11 @@
 (export '(+original-typep-function+
           optimize-typep
           optimize-typep-1
-          typepred))
-
+          typepred
+          ;; configuration variables
+          *typep-warn-on-undefined-typespec*
+          *optimize-typep-warn-on-undefined-typespec*
+          ))
 
 #| Original Definition of `typep`
 (defun typep (object type)
@@ -43,6 +46,15 @@
           (*structure-subtypep (*structure-definition object) f)))))
   nil)
 |#
+
+;;;;
+;;;; * User Configuration
+
+(defparameter *typep-warn-on-undefined-typespec* nil
+  "If non-nil, warn when undefined typespec used on `type`.")
+
+(defparameter *optimize-typep-warn-on-undefined-typespec* t
+  "If non-nil, warn when undefined typespec given to `optimize-typep` or `optimize-typep-1`.")
 
 ;;;;
 ;;;; * Utilities
@@ -176,8 +188,10 @@ object".
       ;; expands into proper typespec via `si:canonicalize-type`.
       ((get type 'si::deftype-definition)
        (typep object (si:canonicalize-type typespec)))
-      (t (warn "type specifier ‚¶‚á‚È‚¢‚Ý‚½‚¢: ~S" typespec)))))
-
+      (t
+       (when *typep-warn-on-undefined-typespec*
+         (warn "type specifier ‚¶‚á‚È‚¢‚Ý‚½‚¢: ~S" typespec))
+       nil))))
 
 ;;;;
 ;;;; * Optimize `typep` form
@@ -341,7 +355,8 @@ object".
 
 ;;; * Function optimize-typep
 
-(defun optimize-typep-1 (object-form typespec &optional no-warn)
+(defun optimize-typep-1 (object-form typespec
+                         &optional (no-warn (null *optimize-typep-warn-on-undefined-typespec*)))
   (multiple-value-bind (type args)
       (if (consp typespec)
         (values (car typespec) (cdr typespec))
