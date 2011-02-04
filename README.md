@@ -49,9 +49,11 @@ type specifier から、受け取ったオブジェクトがその方かどう�
 
 NetInstaller から
 -----------------
-[カフェイン中毒][1] からどうぞ
+<del>[カフェイン中毒][1] からどうぞ</del>
 
   [1]: http://bowbow99.sakura.ne.jp/xyzzy/packages.l
+
+しばしお待ちを。
 
 使い方（開発者向け）
 ===================
@@ -60,6 +62,8 @@ NetInstaller から
 ので、必要に応じて `use-package` するかパッケージプレフィックス付きで指定して
 ください。
 
+    ;; たぶん `optimize-typep` とかを使うマクロを定義するのだろう、ってことで
+    ;; `eval-when` してます。
     (eval-when (:load-toplevel :compile-toplevel :execute)
       (require "typespec+"))
     
