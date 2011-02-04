@@ -339,38 +339,39 @@ object".
 
 ;;; * Function optimize-typep
 
+(defun optimize-typep-1 (object-form typespec &optional no-warn)
+  (multiple-value-bind (type args)
+      (if (consp typespec)
+        (values (car typespec) (cdr typespec))
+        (values typespec nil))
+    (acond
+      ((gethash type *typep-optimizer-table*)
+       (apply it object-form args))
+      ((get type 'si::type-perdicate)
+       `(,it ,object-form))
+      ((get type 'si::type-specifier-list)
+       `(,it ,object-form '(,@args)))
+      ((get type 'si:structure-definition)
+       `(let ((#1=#:object ,object-form))
+          (and (si:*structurep #1#)
+               (si:*structure-subtypep (si:*structure-definition #1#) ,it))))
+      ((get type 'si::deftype-definition)
+       (optimize-typep-1 object-form (si:canonicalize-type typespec)))
+      (t
+       (unless no-warn
+         (warn "type specifier ‚¶‚á‚È‚¢‚Ý‚½‚¢: ~S" typespec))
+       `(typep ,object-form ',typespec)))))
+
 (defun optimize-typep (form)
   "Take a `typep` form and return a form that do same thing but in more efficiently."
   (unless (and (consp form)
                (eq (car form) 'typep)
                (= (length form) 3))
     (error "Invalid typep form: ~S" form))
-  (let ((object-form (second form))
-        (typespec    (third form)))
-    (if (and (consp typespec)
-             (eq (car typespec) 'quote))
-      (progn
-        (setf typespec (second typespec))
-        (multiple-value-bind (type args)
-            (if (consp typespec)
-              (values (car typespec) (cdr typespec))
-              (values typespec nil))
-          (acond
-            ((gethash type *typep-optimizer-table*)
-             (apply it object-form args))
-            ((get type 'si::type-predicate)
-             (list it object-form))
-            ((get type 'si::type-specifier-list)
-             ;; TODO: these functions can be transformed into more effective form.
-             (list it object-form `',args))
-            ((get type 'si:structure-definition)
-             `(let ((#1=#:object ,object-form))
-                (and (si:*structurep #1#)
-                     (si:*structure-subtypep (si:*structure-definition #1#) ,it))))
-            ((get type 'si::deftype-definition)
-             (optimize-typep `(typep ,object-form ,(si:canonicalize-type typespec))))
-            (t form))))
-      form)))
+  (if (and (consp (third form))
+           (eql (car (third form)) 'quote))
+    (optimize-typep-1 (second form) (cadr (third form)) t)
+    form))
 
 
 ;;; typespec+.l ends here.
