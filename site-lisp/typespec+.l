@@ -21,7 +21,8 @@
 
 (export '(+original-typep-function+
           optimize-typep
-          optimize-typep-1))
+          optimize-typep-1
+          typepred))
 
 
 #| Original Definition of `typep`
@@ -374,5 +375,20 @@ object".
     (optimize-typep-1 (second form) (cadr (third form)) t)
     form))
 
+;;;;
+;;;; * Function `typepred`
+
+(defun typepred (typespec)
+  "Return a function which takes one argument OBJECT and return true if the
+OBJECT is type of TYPESPEC."
+  (let ((form (macroexpand (optimize-typep-1 'x typespec))))
+    (cond
+     ((eql form t)   (lambda (x) t))
+     ((eql form nil) (lambda (x) nil))
+     ((and (= (length form) 2)
+           (eql (second form) 'x))
+      (car form))
+     (t
+      (coerce `(lambda (x) ,form) 'function)))))
 
 ;;; typespec+.l ends here.
