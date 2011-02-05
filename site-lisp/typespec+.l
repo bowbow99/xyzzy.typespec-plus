@@ -88,23 +88,31 @@
 (defun single? (object)
   (and (consp object) (null (cdr object))))
 
-(defmacro *let ((var object) &body body)
-  (if (or (symbolp object)
-          (constantp object))
-    (labels ((rec (form)
-               (cond ((eql form var) object)
-                     ((atom form) form)
-                     (t (cons (rec (car form))
-                              (rec (cdr form)))))))
-      (if (single? body) (rec (car body)) `(progn ,@(mapcar #'rec body))))
-    `(let ((,var ,object)) ,@body)))
+(defun *let (binding &rest body)
+  (let ((var (first binding))
+        (object (second binding)))
+    (if (or (symbolp object)
+            (constantp object))
+      (labels ((rec (form)
+                 (cond ((eql form var) object)
+                       ((atom form) form)
+                       (t (cons (rec (car form))
+                                (rec (cdr form)))))))
+        (if (single? body) (rec (car body)) `(progn ,@(mapcar #'rec body))))
+      `(let ((,var ,object)) ,@body))))
+#+xyzzy
+(setf (get '*let 'ed:lisp-indent-hook) 1)
 
-(defmacro *and (&rest tests)
+(defun *and (&rest tests)
   (let ((tests% (remove-if (lambda (x) (and (constantp x) x)) tests)))
     (case (length tests%)
       (0 t)
       (1 (car tests%))
       (t `(and ,@tests%)))))
+
+(defun *or (&rest tests)
+  (cond ((single? tests) (car tests))
+        (t `(or ,@tests))))
 
 (defun both (a b &optional (pred #'identity))
   (and (funcall pred a) (funcall pred b)))
@@ -232,23 +240,24 @@ object".
 ;; and
 (define-typep-optimizer and (object &rest typespecs)
   (if (null typespecs) t
-    `(*let (#1=#:obj ,object)
-       (and ,@(mapcar (lambda (typespec)
-                        (optimize-typep `(typep #1# ',typespec)))
-                typespecs)))))
+    (*let `(#1=#:object ,object)
+      (apply #'*and (mapcar (lambda (typespec)
+                              (optimize-typep-1 '#1# typespec))
+                      typespecs)))))
 
 ;; or
 (define-typep-optimizer or (object &rest typespecs)
   (if (null typespecs) nil
-    `(*let (#1=#:obj ,object)
-       (or ,@(mapcar (lambda (typespec)
-                       (optimize-typep `(typep #1# ',typespec)))
+    (*let `(#1=#:object ,object)
+      (apply #'*or
+             (mapcar (lambda (typespec)
+                       (optimize-typep-1 '#1# typespec))
                typespecs)))))
 
 ;; standard-char
 (define-typep-optimizer standard-char (object)
-  `(*let (#1=#:object ,object)
-     (and (characterp #1#)
+  (*let `(#1=#:object ,object)
+    `(and (characterp #1#)
           (standard-char-p #1#))))
 
 ;; extended-character
@@ -266,18 +275,19 @@ object".
         ((both low high #'consp) ; should be a singleton list of number
          `((< ,(car low) ,object ,(car high))))
         (t
-         `(,(cond ((null low)     t)
+         `(,(cond ((eql low '*)   t)
                   ((numberp low)  `(<= ,low ,object))
                   ((consp low)    `(< ,(car low) ,object)))
-           ,(cond ((null high)    t)
+           ,(cond ((eql high '*)   t)
                   ((numberp high) `(<= ,object ,high))
                   ((consp high)   `(< ,object ,(car high))))))))
 
 (defmacro defopt-number (name predicate)
   `(define-typep-optimizer ,name (object &optional (low '*) (high '*))
-     `(*let (#1=#:object ,object)
-        (*and (,',predicate #1#)
-              ,@(expand-number-range-check '#1# low high)))))
+     (*let `(#1=#:object ,object)
+       (apply #'*and
+              `(,',predicate #1#)
+              (expand-number-range-check '#1# low high)))))
 
 (defopt-number integer integerp)
 (defopt-number float floatp)
@@ -289,18 +299,17 @@ object".
 
 ;; complex
 (define-typep-optimizer complex (object &optional (typespec '*))
-  `(*let (#1=#:object ,object)
-     (*and (complexp #1#)
-          ,(if (eql typespec '*) t
-             (optimize-typep `(typep (realpart #1#) ',typespec))))))
-
+  (*let `(#1=#:object ,object)
+    (*and '(complex #1#)
+          (if (eql typespec '*) t
+            (optimize-typep-1 '(realpart #1#) typespec)))))
 
 ;;; Arrays
-
 (defun expand-array-element-type-check (object element-type)
   (if (eql element-type '*) t
     `(eql (array-element-type ,object)
           ',(upgraded-array-element-type element-type))))
+
 
 (defun expand-array-dimension-check (object dimension-spec)
   (cond ((eql dimension-spec '*) nil)
@@ -317,44 +326,45 @@ object".
 
 ;; array [element-type] [dimension-spec]
 (define-typep-optimizer array (object &optional (element-type '*) (dimension-spec '*))
-  `(*let (#1=#:object ,object)
-     (*and (arrayp #1#)
-           ,(expand-array-element-type-check '#1# element-type)
-           ,(expand-array-dimension-check '#1# dimension-spec))))
+  (*let `(#1=#:object ,object)
+    (apply #'*and
+           '(arrayp #1#)
+          (expand-array-element-type-check '#1# element-type)
+          (expand-array-dimension-check '#1# dimension-spec))))
+
 
 ;; simple-array [element-type] [dimension-spec]
 (define-typep-optimizer simple-array (object &optional (element-type '*) (dimension-spec '*))
-  `(*let (#1=#:object ,object)
-     (*and (si:*simple-array-p #1#)
-           ,(expand-array-element-type-check '#1# element-type)
-           ,(expand-array-dimension-check '#1# dimension-spec))))
+  (*let `(#1=#:object ,object)
+    (apply #'*and
+           '(si:*simple-array-p #1#)
+          (expand-array-element-type-check '#1# element-type)
+          (expand-array-dimension-check '#1# dimension-spec))))
 
 ;; vector [element-type] [size]
 (define-typep-optimizer vector (object &optional (element-type '*) (size '*))
-  `(*let (#1=#:object ,object)
-     (*and (vectorp #1#)
-           ,(expand-array-element-type-check '#1# element-type)
-           ,(expand-vector-size-check '#1# size))))
+  (*let `(#1=#:object ,object)
+    (*and '(vectorp #1#)
+          ;(expand-array-element-type-check '#1# element-type)
+          (expand-vector-size-check '#1# size))))
 
 ;; simple-vector [size]
 (define-typep-optimizer simple-vector (object &optional (size '*))
-  `(*let (#1=#:object ,object)
-     (*and (simple-vector-p #1#)
-           ;,(expand-array-element-type-check '#1# t) ; `simple-vector-p` should doing this check
-           ,(expand-vector-size-check '#1# size))))
+  (*let `(#1=#:object ,object)
+    (*and '(simple-vector-p #1#)
+          (expand-vector-size-check '#1# size))))
 
 ;; string [size]
 (define-typep-optimizer string (object &optional (size '*))
-  `(*let (#1=#:object ,object)
-     (*and (stringp #1#)
-           ,(expand-vector-size-check '#1# size))))
+  (*let `(#1=#:object ,object)
+    (*and '(stringp #1#)
+          (expand-vector-size-check '#1# size))))
 
 ;; simple-string [size]
 (define-typep-optimizer simple-string (object &optional (size '*))
-  `(*let (#1=#:object ,object)
-     (*and (simple-string-p #1#)
-           ,(expand-vector-size-check '#1# size))))
-
+  (*let `(#1=#:object ,object)
+    (*and '(simple-string-p #1#)
+          (expand-vector-size-check '#1# size))))
 
 ;;; * Function optimize-typep
 
