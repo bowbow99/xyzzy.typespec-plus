@@ -103,7 +103,7 @@
 #+xyzzy
 (setf (get '*let 'ed:lisp-indent-hook) 1)
 
-(defun *and (&rest tests)
+(defun *and (tests)
   (let ((tests% (remove-if (lambda (x) (and (constantp x) x)) tests)))
     (case (length tests%)
       (0 t)
@@ -241,9 +241,9 @@ object".
 (define-typep-optimizer and (object &rest typespecs)
   (if (null typespecs) t
     (*let `(#1=#:object ,object)
-      (apply #'*and (mapcar (lambda (typespec)
-                              (optimize-typep-1 '#1# typespec))
-                      typespecs)))))
+      (*and (mapcar (lambda (typespec)
+                      (optimize-typep-1 '#1# typespec))
+              typespecs)))))
 
 ;; or
 (define-typep-optimizer or (object &rest typespecs)
@@ -285,9 +285,8 @@ object".
 (defmacro defopt-number (name predicate)
   `(define-typep-optimizer ,name (object &optional (low '*) (high '*))
      (*let `(#1=#:object ,object)
-       (apply #'*and
-              `(,',predicate #1#)
-              (expand-number-range-check '#1# low high)))))
+       (*and (list* `(,',predicate #1#)
+                    (expand-number-range-check '#1# low high))))))
 
 (defopt-number integer integerp)
 (defopt-number float floatp)
@@ -300,9 +299,9 @@ object".
 ;; complex
 (define-typep-optimizer complex (object &optional (typespec '*))
   (*let `(#1=#:object ,object)
-    (*and '(complex #1#)
-          (if (eql typespec '*) t
-            (optimize-typep-1 '(realpart #1#) typespec)))))
+    (*and (list '(complex #1#)
+                (if (eql typespec '*) t
+                  (optimize-typep-1 '(realpart #1#) typespec))))))
 
 ;;; Arrays
 (defun expand-array-element-type-check (object element-type)
@@ -327,44 +326,42 @@ object".
 ;; array [element-type] [dimension-spec]
 (define-typep-optimizer array (object &optional (element-type '*) (dimension-spec '*))
   (*let `(#1=#:object ,object)
-    (apply #'*and
-           '(arrayp #1#)
-          (expand-array-element-type-check '#1# element-type)
-          (expand-array-dimension-check '#1# dimension-spec))))
+    (*and (list* '(arrayp #1#)
+                 (expand-array-element-type-check '#1# element-type)
+                 (expand-array-dimension-check '#1# dimension-spec)))))
 
 
 ;; simple-array [element-type] [dimension-spec]
 (define-typep-optimizer simple-array (object &optional (element-type '*) (dimension-spec '*))
   (*let `(#1=#:object ,object)
-    (apply #'*and
-           '(si:*simple-array-p #1#)
-          (expand-array-element-type-check '#1# element-type)
-          (expand-array-dimension-check '#1# dimension-spec))))
+    (*and (list* '(si:*simple-array-p #1#)
+                 (expand-array-element-type-check '#1# element-type)
+                 (expand-array-dimension-check '#1# dimension-spec)))))
 
 ;; vector [element-type] [size]
 (define-typep-optimizer vector (object &optional (element-type '*) (size '*))
   (*let `(#1=#:object ,object)
-    (*and '(vectorp #1#)
-          ;(expand-array-element-type-check '#1# element-type)
-          (expand-vector-size-check '#1# size))))
+    (*and (list* '(vectorp #1#)
+                 (expand-array-element-type-check '#1# element-type)
+                 (expand-vector-size-check '#1# size)))))
 
 ;; simple-vector [size]
 (define-typep-optimizer simple-vector (object &optional (size '*))
   (*let `(#1=#:object ,object)
-    (*and '(simple-vector-p #1#)
-          (expand-vector-size-check '#1# size))))
+    (*and (list* '(simple-vector-p #1#)
+                 (expand-vector-size-check '#1# size)))))
 
 ;; string [size]
 (define-typep-optimizer string (object &optional (size '*))
   (*let `(#1=#:object ,object)
-    (*and '(stringp #1#)
-          (expand-vector-size-check '#1# size))))
+    (*and (list* '(stringp #1#)
+                 (expand-vector-size-check '#1# size)))))
 
 ;; simple-string [size]
 (define-typep-optimizer simple-string (object &optional (size '*))
   (*let `(#1=#:object ,object)
-    (*and '(simple-string-p #1#)
-          (expand-vector-size-check '#1# size))))
+    (*and (list* '(simple-string-p #1#)
+                 (expand-vector-size-check '#1# size)))))
 
 ;;; * Function optimize-typep
 
