@@ -1,0 +1,163 @@
+;;; -*- mode: lisp -*-
+
+;;;;
+;;;; * Atoms
+;; t
+;; nil
+;; atom
+;; list
+;; null
+;; cons  [CAR-TYPE [CDR-TYPE]]
+;; symbol
+;; keyword
+;; hash-table
+;; function
+;; compiled-function
+;; package
+;; random-state
+;; readtable
+;; sequence
+
+;; ed:buffer
+;; ed:marker
+;; ed:process
+;; ed:regexp
+;; ed:syntax-table
+;; ed:menu
+;; ed:dde-handle
+;; ed:window
+;; ed:oledata
+
+;;; NOTE: Not supported in xyzzy
+;; restart
+;; pathname
+;; logical-pathname
+
+;;;;
+;;;; * Numbers
+;; number
+;; real  [LOWER [UPPER]]
+;; integer  [LOWER [UPPER]]
+;; fixnum
+;; bignum
+;; mod  N
+;; ratio
+;; rational  [LOWER [UPPER]]
+;; float  [LOWER [UPPER]]
+;; single-float  [LOWER [UPPER]]
+;; short-float  [LOWER [UPPER]]
+;; double-float  [LOWER [UPPER]]
+;; long-float  [LOWER [UPPER]]
+;; complex
+
+;;; NOTE: Not supported in xyzzy
+;; bit
+;; unsigned-byte  {SIZE | *}
+;; signed-byte  {SIZE | *}
+
+
+;;;;
+;;;; * Characters
+;; character
+;; standard-char
+
+;;; NOTE: Followings has different name than Common Lisp standard
+;; base-character
+;; extended-character
+
+
+;;;;
+;;;; * Arrays
+;; array  [ELEMENT-TYPE [DIMENSION-SPEC]]
+;; simple-array  [ELEMENT-TYPE [DIMENSION-SPEC]]
+
+;; vector  [ELEMENT-TYPE [SIZE]]
+
+;; simple-vector  [SIZE]
+
+;;; NOTE: Not supported in xyzzy
+;; bit-vector  [SIZE]
+;; simple-bit-vector  [SIZE]
+
+;; string  [SIZE]
+;; simple-string  [SIZE]
+
+;;; NOTE: Not supported in xyzzy
+;; base-string  [SIZE]
+;; simple-base-string  [SIZE]
+
+
+
+;;;;
+;;;; * Streams
+;; stream
+;; broadcast-stream
+;; concatenated-stream
+;; string-stream
+;; echo-stream
+;; synonym-stream
+;; two-way-stream
+;; file-stream
+
+
+;;;;
+;;;; * Conditions
+;; condition
+;; simple-condition
+;; warning
+;; simple-warning
+;; style-warning
+;; serious-condition
+;; error
+;; simple-error
+;; arithmetic-error
+;; simple-type-error
+;; cell-error
+;; storage-condition
+;; stream-error
+;; package-error
+;; control-error
+;; parse-error
+;; division-by-zero
+;; print-not-readable
+;; program-error
+;; end-of-file
+;; reader-error
+;; file-error
+;; type-error
+;; unbound-slot
+;; unbound-variable
+;; undefined-function
+;; floating-point-inexact
+;; floating-point-invalid-operation
+;; floating-point-overflow
+;; floating-point-underflow
+
+
+;;;;
+;;;; * Compound Types
+;; and  TYPESPEC*
+;; or  TYPESPEC*
+;; not  TYPESPEC
+;; eql  OBJECT
+;; member  OBJECT
+;; satisfies  FUNCTION
+;; values
+
+
+;;;;
+;;;; * CLOS
+;; generic-function
+;; built-in-class
+;; method-combination
+;; standard-class
+;; standard-generic-function
+;; class
+;; standard-method
+;; standard-object
+;; structure-class
+;; structure-object
+;; method
+
+
+;;; typespec-list.txt ends here.
