@@ -239,7 +239,9 @@ object".
 
 ;; and
 (define-typep-optimizer and (object &rest typespecs)
-  (if (null typespecs) t
+  (if (null typespecs)
+    ;; `*let` removes OBJECT form if its a constant or a variable (not necessary to evaluate)
+    (*let `(#:object ,object) t)
     (*let `(#1=#:object ,object)
       (*and (mapcar (lambda (typespec)
                       (optimize-typep-1 '#1# typespec))
