@@ -51,13 +51,15 @@
 (define-test t
   (assert-same t)
   (assert-optimize X t  t)
-  (assert-optimize (foo x y z) t t))
+  (assert-optimize (foo x y z) t
+    (let ((#:object (foo x y z))) t)))
 
 ;; nil
 (define-test nil
   (assert-same nil)
   (assert-optimize X nil nil)
-  (assert-optimize (foo x y z) nil nil))
+  (assert-optimize (foo x y z) nil
+    (let ((#:object (foo x y z))) nil)))
 
 ;; atom
 (define-test atom

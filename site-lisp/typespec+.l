@@ -218,8 +218,8 @@ object".
 ;;; function, but can be transformed into more straightforward form.
 
 ;; t, nil
-(define-typep-optimizer t   (object) t)
-(define-typep-optimizer nil (object) nil)
+(define-typep-optimizer t   (object) (*let `(#:object ,object) t))
+(define-typep-optimizer nil (object) (*let `(#:object ,object) nil))
 
 ;; satisfies
 (define-typep-optimizer satisfies (object pred)
