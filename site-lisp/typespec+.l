@@ -249,7 +249,8 @@ object".
 
 ;; or
 (define-typep-optimizer or (object &rest typespecs)
-  (if (null typespecs) nil
+  (if (null typespecs)
+    (*let `(#:object ,object) nil)
     (*let `(#1=#:object ,object)
       (apply #'*or
              (mapcar (lambda (typespec)
