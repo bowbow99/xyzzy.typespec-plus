@@ -24,7 +24,7 @@
     ,(find-package :lisp) ,(find-package :keyword)
     ,(copy-readtable)
     ,(make-hash-table)
-    0 1 2 3 4 5 6 7 8 9 10 100 1200 123.456
+    0 1 2 3 4 5 6 7 8 9 10 100 1200 123.456 1/2 2/3 3.5/1.2 #C(3 4) #C(12.3 34.5)
     "string" #(1 2 3)
     ,(car (ed:buffer-list)) ,(ed:selected-buffer) ,(ed:selected-window)
     ,(ed:compile-regexp "") ,(ed:compile-regexp "[a-z]+" t)
