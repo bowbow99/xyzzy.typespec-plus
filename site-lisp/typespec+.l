@@ -305,7 +305,7 @@ object".
 ;; complex
 (define-typep-optimizer complex (object &optional (typespec '*))
   (*let `(#1=#:object ,object)
-    (*and (list '(complex #1#)
+    (*and (list '(complexp #1#)
                 (if (eql typespec '*) t
                   (optimize-typep-1 '(realpart #1#) typespec))))))
 
