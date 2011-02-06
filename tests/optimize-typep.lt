@@ -288,7 +288,28 @@
 
 ;;;;
 ;;;; * Compound Types
+
 ;; and  TYPESPEC*
+(define-test and
+  (assert-same (and))
+  (assert-same (and t))
+  (assert-same (and string integer))
+  (assert-same (and number integer))
+  (assert-same (and atom cons))
+  ;; optimization for variable
+  (assert-optimize X (and) t)
+  (assert-optimize X (and t) t)
+  (assert-optimize X (and string integer) (and (stringp X) (integerp X)))
+  ;; optimization for expression
+  (assert-optimize (foo x y z) (and)
+    (let ((#:object (foo x y z))) t))
+  (assert-optimize (foo x y z) (and t)
+    (let ((#:object (foo x y z))) t))
+  (assert-optimize (foo x y z) (and number integer)
+    (let ((#:object (foo x y z)))
+      (and (numberp #:object) (integerp #:object))))
+  )
+
 ;; or  TYPESPEC*
 ;; not  TYPESPEC
 ;; eql  OBJECT
