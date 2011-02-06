@@ -187,6 +187,37 @@
 
 
 ;;;;
+;;;; * Characters
+
+;; character
+(define-test character
+  (assert-same character)
+  (assert-optimize X character (characterp X))
+  (assert-optimize (foo x y z) character (characterp (foo x y z))))
+
+;; standard-char
+(define-test standard-char
+  (assert-same standard-char)
+  (assert-optimize X standard-char (and (characterp X) (standard-char-p X)))
+  (assert-optimize (foo x y z) standard-char
+    (let ((#:object (foo x y z)))
+      (and (characterp #:object) (standard-char-p #:object)))))
+
+;;; NOTE: Followings has different name than Common Lisp standard
+;; base-character
+(define-test base-character
+  (assert-same base-character)
+  (assert-optimize X base-character (characterp X))
+  (assert-optimize (foo x y z) base-character (characterp (foo x y z))))
+
+;; extended-character
+(define-test extended-character
+  (assert-same extended-character)
+  (assert-optimize X extended-character nil)
+  (assert-optimize (foo x y z) extended-character (let ((#:object (foo x y z))) nil)))
+
+
+;;;;
 ;;;; * Numbers
 ;; number
 ;; real  [LOWER [UPPER]]
@@ -208,16 +239,6 @@
 ;; bit
 ;; unsigned-byte  {SIZE | *}
 ;; signed-byte  {SIZE | *}
-
-
-;;;;
-;;;; * Characters
-;; character
-;; standard-char
-
-;;; NOTE: Followings has different name than Common Lisp standard
-;; base-character
-;; extended-character
 
 
 ;;;;
