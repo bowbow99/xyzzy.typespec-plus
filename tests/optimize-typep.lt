@@ -40,7 +40,7 @@
 (defmacro assert-optimize (object-form typespec optimized)
   `(assert-equality #'form-equal
        ',optimized
-       ',(optimize-typep-1 object-form typespec)))
+       (optimize-typep-1 ',object-form ',typespec)))
 #+xyzzy
 (setf (get 'assert-optimize 'ed:lisp-indent-hook) 2)
 
