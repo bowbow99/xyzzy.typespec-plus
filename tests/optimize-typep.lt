@@ -34,7 +34,8 @@
   `(dolist (#1=#:object *example-objects*)
      (assert-equality #'logically-equal
          (typep #1# ',typespec)
-         ,(optimize-typep-1 '#1# typespec))))
+         ,(optimize-typep-1 '#1# typespec)
+       #1# ',typespec)))
 
 
 (defmacro assert-optimize (object-form typespec optimized)
