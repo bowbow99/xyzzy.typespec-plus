@@ -219,21 +219,161 @@
 
 ;;;;
 ;;;; * Numbers
+
 ;; number
+(define-test number
+  (assert-same number)
+  (assert-optimize X number (numberp X))
+  (assert-optimize (foo x y z) number (numberp (foo x y z))))
+
+;;; NOTE: xyzzy doesn't support LOWER/UPPER range on real (just ignored)
 ;; real  [LOWER [UPPER]]
+(define-test real
+  (assert-same real)
+  (assert-optimize X real (realp X))
+  (assert-optimize (foo x y z) real (realp (foo x y z))))
+
 ;; integer  [LOWER [UPPER]]
+(define-test integer
+  (assert-same integer)
+  (assert-same (integer *))
+  (assert-same (integer * *))
+  (progn ; inclusive range
+    (assert-same (integer 0 *))
+    (assert-same (integer * 0))
+    (assert-same (integer 0 100)))
+  (progn ; exclusive range
+    (assert-same (integer (0) *))
+    (assert-same (integer * (100)))
+    (assert-same (integer (0) (100))))
+  ;; optimization for variable
+  (assert-optimize X integer (integerp X))
+  (assert-optimize X (integer *) (integerp X))
+  (assert-optimize X (integer * *) (integerp X))
+  (progn ; inclusive range
+    (assert-optimize X (integer * 0) (and (integerp X) (<= X 0)))
+    (assert-optimize X (integer 0 *) (and (integerp X) (<= 0 X)))
+    (assert-optimize X (integer 0 100) (and (integerp X) (<= 0 X 100))))
+  (progn ; exclusive range
+    (assert-optimize X (integer * (0)) (and (integerp X) (< X 0)))
+    (assert-optimize X (integer (0) *) (and (integerp X) (< 0 X)))
+    (assert-optimize X (integer (0) (1)) (and (integerp X) (< 0 X 1))))
+  (progn ; combination of inclusive range and exclusive range
+    (assert-optimize X (integer (0) 100)
+      (and (integerp X) (< 0 X) (<= X 100)))
+    (assert-optimize X (integer 0 (100))
+      (and (integerp X) (<= 0 X) (< X 100))))
+  ;; optimization for expression
+  (assert-optimize (foo x y z) integer (integerp (foo x y z)))
+  (assert-optimize (foo x y z) (integer *) (integerp (foo x y z)))
+  (assert-optimize (foo x y z) (integer * *) (integerp (foo x y z)))
+  (progn ; inclusive range
+    (assert-optimize (foo x y z) (integer 0 *)
+      (let ((#:object (foo x y z)))
+        (and (integerp #:object) (<= 0 #:object))))
+    (assert-optimize (foo x y z) (integer * 100)
+      (let ((#:object (foo x y z)))
+        (and (integerp #:object) (<= #:object 100))))
+    (assert-optimize (foo x y z) (integer 0 100)
+      (let ((#:object (foo x y z)))
+        (and (integerp #:object) (<= 0 #:object 100)))))
+  (progn ; exclusive range
+    (assert-optimize (foo x y z) (integer (0) *)
+      (let ((#:object (foo x y z)))
+        (and (integerp #:object) (< 0 #:object))))
+    (assert-optimize (foo x y z) (integer * (100))
+      (let ((#:object (foo x y z)))
+        (and (integerp #:object) (< #:object 100))))
+    (assert-optimize (foo x y z) (integer (0) (100))
+      (let ((#:object (foo x y z)))
+        (and (integerp #:object) (< 0 #:object 100)))))
+  (progn ; combination of inclusive range and exclusive range
+    (assert-optimize (foo x y z) (integer (0) 100)
+      (let ((#:object (foo x y z)))
+        (and (integerp #:object) (< 0 #:object) (<= #:object 100))))
+    (assert-optimize (foo x y z) (integer 0 (100))
+      (let ((#:object (foo x y z)))
+        (and (integerp #:object) (<= 0 #:object) (< #:object 100))))))
 
 ;; fixnum
+(define-test fixnum
+  (assert-same fixnum)
+  (assert-optimize X fixnum (si:*fixnump X))
+  (assert-optimize (foo x y z) fixnum (si:*fixnump (foo x y z))))
+
 ;; bignum
+(define-test bignum
+  (assert-same bignum)
+  (assert-optimize X bignum (si:*bignump X))
+  (assert-optimize (foo x y z) bignum (si:*bignump (foo x y z))))
+
 ;; mod  N
+(define-test mod
+  (assert-same (mod 0))
+  (assert-same (mod 1000))
+  (assert-optimize X (mod 100) (and (integerp X) (<= 0 X 99)))
+  (assert-optimize (foo x y z) (mod 100)
+    (let ((#:object (foo x y z)))
+      (and (integerp #:object) (<= 0 #:object 99)))))
+
 ;; ratio
+(define-test ratio
+  (assert-same ratio)
+  (assert-optimize X ratio (si:*ratiop X))
+  (assert-optimize (foo x y z) ratio (si:*ratiop (foo x y z))))
+
+;;; NOTE: Following six numerical types can check whether the value is
+;;; in range or not, as `integer`.  Optimization of this range checking
+;;; is done in the same function as optimization for `integer` and its
+;;; tested in tests for `integer`.  So I don't test range checking here
+;;; again.
+
 ;; rational  [LOWER [UPPER]]
+(define-test rational
+  (assert-same rational)
+  (assert-optimize X rational (rationalp X)))
+
 ;; float  [LOWER [UPPER]]
+(define-test float
+  (assert-same float)
+  (assert-optimize X float (floatp X)))
+
 ;; single-float  [LOWER [UPPER]]
+(define-test single-float
+  (assert-same single-float)
+  (assert-optimize X single-float (single-float-p X)))
+
 ;; short-float  [LOWER [UPPER]]
+(define-test short-float
+  (assert-same short-float)
+  (assert-optimize X short-float (short-float-p X)))
+
 ;; double-float  [LOWER [UPPER]]
+(define-test double-float
+  (assert-same double-float)
+  (assert-optimize X double-float (double-float-p X)))
+
 ;; long-float  [LOWER [UPPER]]
-;; complex
+(define-test long-float
+  (assert-optimize X long-float (long-float-p X)))
+
+
+;; complex  [TYPESPEC]
+(define-test complex
+  (assert-same complex)
+  (assert-same (complex *))
+  (assert-same (complex float))
+  ;; optimization for variable
+  (assert-optimize X complex (complexp X))
+  (assert-optimize X (complex *) (complexp X))
+  (assert-optimize X (complex float) (and (complexp X) (floatp (realpart X))))
+  ;; optimization for expression
+  (assert-optimize (foo x y z) complex (complexp (foo x y z)))
+  (assert-optimize (foo x y z) (complex *) (complexp (foo x y z)))
+  (assert-optimize (foo x y z) (complex float)
+    (let ((#:object (foo x y z)))
+      (and (complexp #:object) (floatp (realpart #:object)))))
+  )
 
 ;;; NOTE: Not supported in xyzzy
 ;; bit
