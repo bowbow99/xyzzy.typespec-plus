@@ -394,7 +394,7 @@
 (define-test satisfies
   (assert-same (satisfies atom))
   (assert-same (satisfies identity))
-  (assert-same (satisfies oddp))
+  (assert-same (and integer (satisfies oddp)))
   ;; optimization for variable
   (assert-optimize X (satisfies atom) (atom X))
   (assert-optimize X (satisfies identity) (identity X))
