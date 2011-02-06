@@ -356,8 +356,56 @@
       (not (stringp #:object)))))
 
 ;; eql  OBJECT
+(define-test eql
+  (assert-same (eql t))
+  (assert-same (eql nil))
+  (assert-same (eql 0))
+  (assert-same (eql foo))
+  ;; optimization for variable
+  (assert-optimize X (eql t) (eql X 't))
+  (assert-optimize X (eql nil) (eql X 'nil))
+  (assert-optimize X (eql 0) (eql X '0))
+  (assert-optimize X (eql foo) (eql X 'foo))
+  ;; optimization for expression
+  (assert-optimize (foo x y z) (eql t) (eql (foo x y z) 't))
+  (assert-optimize (foo x y z) (eql nil) (eql (foo x y z) 'nil))
+  (assert-optimize (foo x y z) (eql 0) (eql (foo x y z) '0))
+  (assert-optimize (foo x y z) (eql foo) (eql (foo x y z) 'foo))
+  )
+
 ;; member  OBJECT
+(define-test member
+  (assert-same (member))
+  (assert-same (member foo bar baz))
+  (assert-same (member 0 1 2 3 4 5 6 7 8 9))
+  ;; optimization for variable
+  (assert-optimize X (member) nil)
+  (assert-optimize X (member foo bar baz) (member X '(foo bar baz) :test #'eql))
+  (assert-optimize X (member 0 1 2 3 4 5 6 7 8 9) (member X '(0 1 2 3 4 5 6 7 8 9) :test #'eql))
+  ;; optimization for expression
+  (assert-optimize (foo x y z) (member)
+    (let ((#:object (foo x y z))) nil))
+  (assert-optimize (foo x y z) (member foo bar baz)
+    (member (foo x y z) '(foo bar baz) :test #'eql))
+  (assert-optimize (foo x y z) (member 0 1 2 3 4 5 6 7 8 9)
+    (member (foo x y z) '(0 1 2 3 4 5 6 7 8 9) :test #'eql)))
+
 ;; satisfies  FUNCTION
+(define-test satisfies
+  (assert-same (satisfies atom))
+  (assert-same (satisfies identity))
+  (assert-same (satisfies oddp))
+  ;; optimization for variable
+  (assert-optimize X (satisfies atom) (atom X))
+  (assert-optimize X (satisfies identity) (identity X))
+  (assert-optimize X (satisfies oddp) (oddp X))
+  ;; optimization for expression
+  (assert-optimize (foo x y z) (satisfies atom) (atom (foo x y z)))
+  (assert-optimize (foo x y z) (satisfies identity) (identity (foo x y z)))
+  (assert-optimize (foo x y z) (satisfies oddp) (oddp (foo x y z)))
+  )
+
+;;; NOTE: `values` is only for declarations, not allowed in `typep`
 ;; values
 
 

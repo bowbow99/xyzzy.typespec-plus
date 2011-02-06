@@ -231,11 +231,16 @@ object".
 
 ;; eql
 (define-typep-optimizer eql (actual expected)
-  `(eql ,actual ,expected))
+  `(eql ,actual ',expected))
 
 ;; not
 (define-typep-optimizer not (object typespec)
-  `(not ,(optimize-typep `(typep ,object ',typespec))))
+  ;`(not ,(optimize-typep `(typep ,object ',typespec))))
+  (*let `(#1=#:object ,object)
+    (let ((optimized (optimize-typep-1 '#1# typespec)))
+      (cond ((eql optimized t) nil)
+            ((eql optimized nil) t)
+            (t `(not ,optimized))))))
 
 ;; and
 (define-typep-optimizer and (object &rest typespecs)
