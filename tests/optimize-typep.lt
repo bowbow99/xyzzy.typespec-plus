@@ -26,6 +26,8 @@
     ,(make-hash-table)
     0 1 2 3 4 5 6 7 8 9 10 100 1200 123.456
     "string" #(1 2 3)
+    ,(car (ed:buffer-list)) ,(ed:selected-buffer) ,(ed:selected-window)
+    ,(ed:compile-regexp "") ,(ed:compile-regexp "[a-z]+" t)
     ))
 
 (defmacro assert-same (typespec)
@@ -136,20 +138,51 @@
   (assert-optimize X sequence (sequencep X))
   (assert-optimize (foo x y z) sequence (sequencep (foo x y z))))
 
+;;; NOTE: Not supported in xyzzy
+;; restart
+;; pathname
+;; logical-pathname
+
+
+;;;;
+;;;; * xyzzy Specific Types
+
 ;; ed:buffer
+(define-test ed:buffer
+  (assert-same ed:buffer)
+  (assert-optimize X ed:buffer (ed:bufferp X))
+  (assert-optimize (foo x y z) ed:buffer (ed:bufferp (foo x y z))))
+
 ;; ed:marker
+(define-test ed:marker
+  (let* ((buffer (ed:create-new-buffer " *Test Example for typespec+*"))
+         (marker (ed:make-marker buffer)))
+    (unwind-protect
+        (let ((*example-objects* (list* buffer marker
+                                        *example-objects*)))
+          (assert-same ed:marker))
+      (ed:delete-buffer buffer)))
+  (assert-optimize X ed:marker (ed:markerp X))
+  (assert-optimize (foo x y z) ed:marker (ed:markerp (foo x y z))))
+
 ;; ed:regexp
-;; ed:syntax-table
+(define-test ed:regexp
+  (assert-same ed:regexp)
+  (assert-optimize X ed:regexp (ed:regexpp X))
+  (assert-optimize (foo x y z) ed:regexp (ed:regexpp (foo x y z))))
+
 ;; ed:window
+(define-test ed:window
+  (assert-same ed:window)
+  (assert-optimize X ed:window (ed:windowp X))
+  (assert-optimize (foo x y z) ed:window (ed:windowp (foo x y z))))
+
+;; ed:syntax-table
 ;; ed:menu
 ;; ed:process
 ;; ed:dde-handle
 ;; ed:oledata
 
-;;; NOTE: Not supported in xyzzy
-;; restart
-;; pathname
-;; logical-pathname
 
 ;;;;
 ;;;; * Numbers
