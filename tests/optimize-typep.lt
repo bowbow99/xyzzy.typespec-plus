@@ -355,6 +355,7 @@
 
 ;; long-float  [LOWER [UPPER]]
 (define-test long-float
+  (assert-same long-float)
   (assert-optimize X long-float (long-float-p X)))
 
 
@@ -372,8 +373,7 @@
   (assert-optimize (foo x y z) (complex *) (complexp (foo x y z)))
   (assert-optimize (foo x y z) (complex float)
     (let ((#:object (foo x y z)))
-      (and (complexp #:object) (floatp (realpart #:object)))))
-  )
+      (and (complexp #:object) (floatp (realpart #:object))))))
 
 ;;; NOTE: Not supported in xyzzy
 ;; bit
