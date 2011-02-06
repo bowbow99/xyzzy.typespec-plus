@@ -307,10 +307,32 @@
     (let ((#:object (foo x y z))) t))
   (assert-optimize (foo x y z) (and number integer)
     (let ((#:object (foo x y z)))
-      (and (numberp #:object) (integerp #:object))))
-  )
+      (and (numberp #:object) (integerp #:object)))))
 
 ;; or  TYPESPEC*
+(define-test or
+  (assert-same (or))
+  (assert-same (or t))
+  (assert-same (or nil))
+  (assert-same (or string symbol))
+  (assert-same (or cons null))
+  ;; optimization for variable
+  (assert-optimize X (or) nil)
+  (assert-optimize X (or t) t)
+  (assert-optimize X (or nil) nil)
+  (assert-optimize X (or string symbol) (or (stringp X) (symbolp X)))
+  ;; optimization for expression
+  (assert-optimize (foo x y z) (or)
+    (let ((#:object (foo x y z))) nil))
+  (assert-optimize (foo x y z) (or t)
+    (let ((#:object (foo x y z))) t))
+  (assert-optimize (foo x y z) (or nil)
+    (let ((#:object (foo x y z))) nil))
+  (assert-optimize (foo x y z) (or string symbol)
+    (let ((#:object (foo x y z)))
+      (or (stringp #:object) (symbolp #:object)))))
+
+
 ;; not  TYPESPEC
 ;; eql  OBJECT
 ;; member  OBJECT
