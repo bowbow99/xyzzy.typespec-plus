@@ -195,8 +195,6 @@ object".
       ((get type 'si::structure-definition)
        (and (si:*structurep object)
             (si:*structure-subtypep (si:*structure-definition object) it)))
-      ;; TODO: if `type` has `si::deftype-definition` property, it can be
-      ;; expands into proper typespec via `si:canonicalize-type`.
       ((get type 'si::deftype-definition)
        (typep object (si:canonicalize-type typespec)))
       (t
@@ -223,6 +221,7 @@ object".
 
 ;; satisfies
 (define-typep-optimizer satisfies (object pred)
+  ;; TODO: CLHS explicitly denying use of lambda-expression as pred
   `(,pred ,object))
 
 ;; member
@@ -235,7 +234,6 @@ object".
 
 ;; not
 (define-typep-optimizer not (object typespec)
-  ;`(not ,(optimize-typep `(typep ,object ',typespec))))
   (*let `(#1=#:object ,object)
     (let ((optimized (optimize-typep-1 '#1# typespec)))
       (cond ((eql optimized t) nil)
