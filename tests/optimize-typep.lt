@@ -1,0 +1,282 @@
+;;; -*- mode: lisp; package: test.optimize-typep -*-
+;;;
+;;; tests/optimize-typep.lt
+;;;
+
+;;; Code:
+
+(require "typespec+")
+(require "lisp-unit")
+
+(defpackage :test.optimize-typep
+  (:use :lisp :lisp-unit :typespec+))
+
+(in-package :test.optimize-typep)
+
+(remove-all-tests :test.optimize-typep)
+
+(defparameter *example-objects*
+  `(t
+    nil
+    (foo bar baz) ("foo" "bar" "baz") (a (b (c))) (a . b) (a b . c) ; #1=(a b . #1#)
+    lisp:car foo-bar-baz :keyword ,(gensym) #:uninterned |with space|
+    #'car #'mapcar ,(lambda (x) x)
+    ,(find-package :lisp) ,(find-package :keyword)
+    ,(copy-readtable)
+    ,(make-hash-table)
+    0 1 2 3 4 5 6 7 8 9 10 100 1200 123.456
+    "string" #(1 2 3)
+    ))
+
+(defmacro assert-same (typespec)
+  `(dolist (#1=#:object *example-objects*)
+     (assert-equality #'logically-equal
+         (typep #1# ',typespec)
+         ,(optimize-typep-1 '#1# typespec))))
+
+
+(defmacro assert-optimize (object-form typespec optimized)
+  `(assert-equality #'form-equal
+       ',optimized
+       ',(optimize-typep-1 object-form typespec)))
+#+xyzzy
+(setf (get 'assert-optimize 'ed:lisp-indent-hook) 2)
+
+
+;;;;
+;;;; * Atoms
+;; t
+(define-test t
+  (assert-same t)
+  (assert-optimize X t  t)
+  (assert-optimize (foo x y z) t t))
+
+;; nil
+(define-test nil
+  (assert-same nil)
+  (assert-optimize X nil nil)
+  (assert-optimize (foo x y z) nil nil))
+
+;; atom
+(define-test atom
+  (assert-same atom)
+  (assert-optimize X atom (atom X))
+  (assert-optimize (foo x y z) atom (atom (foo x y z))))
+
+;; list
+(define-test list
+  (assert-same list)
+  (assert-optimize X list (listp X))
+  (assert-optimize (foo x y z) list (listp (foo x y z))))
+
+;; null
+(define-test null
+  (assert-same null)
+  (assert-optimize X null (null X))
+  (assert-optimize (foo x y z) null (null (foo x y z))))
+
+;; cons  [CAR-TYPE [CDR-TYPE]]
+;; NOTE: Compound form of `cons` is not supported in xyzzy
+(define-test cons
+  (assert-same cons)
+  (assert-optimize X cons (consp X))
+  (assert-optimize (foo x y z) cons (consp (foo x y z))))
+
+;; symbol
+(define-test symbol
+  (assert-same symbol)
+  (assert-optimize X symbol (symbolp X))
+  (assert-optimize (foo x y z) symbol (symbolp (foo x y z))))
+
+;; keyword
+(define-test keyword
+  (assert-same keyword)
+  (assert-optimize X keyword (keywordp X))
+  (assert-optimize (foo x y z) keyword (keywordp (foo x y z))))
+
+;; hash-table
+(define-test hash-table
+  (assert-same hash-table)
+  (assert-optimize X hash-table (hash-table-p X))
+  (assert-optimize (foo x y z) hash-table (hash-table-p (foo x y z))))
+
+;; function
+(define-test function
+  (assert-same function)
+  (assert-optimize X function (functionp X))
+  (assert-optimize (foo x y z) function (functionp (foo x y z))))
+
+;; compiled-function
+(define-test compiled-function
+  (assert-same compiled-function)
+  (assert-optimize X compiled-function (compiled-function-p X))
+  (assert-optimize (foo x y z) compiled-function (compiled-function-p (foo x y z))))
+
+;; package
+(define-test package
+  (assert-same package)
+  (assert-optimize X package (packagep X))
+  (assert-optimize (foo x y z) package (packagep (foo x y z))))
+
+;; random-state
+(define-test random-state
+  (assert-same random-state)
+  (assert-optimize X random-state (random-state-p X))
+  (assert-optimize (foo x y z) random-state (random-state-p (foo x y z))))
+
+;; readtable
+(define-test readtable
+  (assert-same readtable)
+  (assert-optimize X readtable (readtablep X))
+  (assert-optimize (foo x y z) readtable (readtablep (foo x y z))))
+
+;; sequence
+(define-test sequence
+  (assert-same sequence)
+  (assert-optimize X sequence (sequencep X))
+  (assert-optimize (foo x y z) sequence (sequencep (foo x y z))))
+
+;; ed:buffer
+;; ed:marker
+;; ed:regexp
+;; ed:syntax-table
+;; ed:window
+;; ed:menu
+;; ed:process
+;; ed:dde-handle
+;; ed:oledata
+
+;;; NOTE: Not supported in xyzzy
+;; restart
+;; pathname
+;; logical-pathname
+
+;;;;
+;;;; * Numbers
+;; number
+;; real  [LOWER [UPPER]]
+;; integer  [LOWER [UPPER]]
+
+;; fixnum
+;; bignum
+;; mod  N
+;; ratio
+;; rational  [LOWER [UPPER]]
+;; float  [LOWER [UPPER]]
+;; single-float  [LOWER [UPPER]]
+;; short-float  [LOWER [UPPER]]
+;; double-float  [LOWER [UPPER]]
+;; long-float  [LOWER [UPPER]]
+;; complex
+
+;;; NOTE: Not supported in xyzzy
+;; bit
+;; unsigned-byte  {SIZE | *}
+;; signed-byte  {SIZE | *}
+
+
+;;;;
+;;;; * Characters
+;; character
+;; standard-char
+
+;;; NOTE: Followings has different name than Common Lisp standard
+;; base-character
+;; extended-character
+
+
+;;;;
+;;;; * Arrays
+;; array  [ELEMENT-TYPE [DIMENSION-SPEC]]
+;; simple-array  [ELEMENT-TYPE [DIMENSION-SPEC]]
+
+;; vector  [ELEMENT-TYPE [SIZE]]
+
+;; simple-vector  [SIZE]
+
+;;; NOTE: Not supported in xyzzy
+;; bit-vector  [SIZE]
+;; simple-bit-vector  [SIZE]
+
+;; string  [SIZE]
+;; simple-string  [SIZE]
+
+;;; NOTE: Not supported in xyzzy
+;; base-string  [SIZE]
+;; simple-base-string  [SIZE]
+
+
+
+;;;;
+;;;; * Streams
+;; stream
+;; broadcast-stream
+;; concatenated-stream
+;; string-stream
+;; echo-stream
+;; synonym-stream
+;; two-way-stream
+;; file-stream
+
+
+;;;;
+;;;; * Conditions
+;; condition
+;; simple-condition
+;; warning
+;; simple-warning
+;; style-warning
+;; serious-condition
+;; error
+;; simple-error
+;; arithmetic-error
+;; simple-type-error
+;; cell-error
+;; storage-condition
+;; stream-error
+;; package-error
+;; control-error
+;; parse-error
+;; division-by-zero
+;; print-not-readable
+;; program-error
+;; end-of-file
+;; reader-error
+;; file-error
+;; type-error
+;; unbound-slot
+;; unbound-variable
+;; undefined-function
+;; floating-point-inexact
+;; floating-point-invalid-operation
+;; floating-point-overflow
+;; floating-point-underflow
+
+
+;;;;
+;;;; * Compound Types
+;; and  TYPESPEC*
+;; or  TYPESPEC*
+;; not  TYPESPEC
+;; eql  OBJECT
+;; member  OBJECT
+;; satisfies  FUNCTION
+;; values
+
+
+;;;;
+;;;; * CLOS
+;; generic-function
+;; built-in-class
+;; method-combination
+;; standard-class
+;; standard-generic-function
+;; class
+;; standard-method
+;; standard-object
+;; structure-class
+;; structure-object
+;; method
+
+
+;;; tests/optimize-typep.lt ends here.
