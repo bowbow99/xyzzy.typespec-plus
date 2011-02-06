@@ -379,12 +379,12 @@
   (assert-same (member foo bar baz))
   (assert-same (member 0 1 2 3 4 5 6 7 8 9))
   ;; optimization for variable
-  (assert-optimize X (member) nil)
+  (assert-optimize X (member) (member X 'nil :test #'eql))
   (assert-optimize X (member foo bar baz) (member X '(foo bar baz) :test #'eql))
   (assert-optimize X (member 0 1 2 3 4 5 6 7 8 9) (member X '(0 1 2 3 4 5 6 7 8 9) :test #'eql))
   ;; optimization for expression
   (assert-optimize (foo x y z) (member)
-    (let ((#:object (foo x y z))) nil))
+    (member (foo x y z) '() :test #'eql))
   (assert-optimize (foo x y z) (member foo bar baz)
     (member (foo x y z) '(foo bar baz) :test #'eql))
   (assert-optimize (foo x y z) (member 0 1 2 3 4 5 6 7 8 9)
