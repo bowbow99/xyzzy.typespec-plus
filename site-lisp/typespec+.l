@@ -268,7 +268,7 @@ object".
 
 ;; extended-character
 (define-typep-optimizer extended-character (object)
-  (*let `(#:object object) nil))
+  (*let `(#:object ,object) nil))
 
 
 ;;; Numbers
