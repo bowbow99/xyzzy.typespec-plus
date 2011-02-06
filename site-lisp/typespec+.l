@@ -274,9 +274,7 @@ object".
 ;;; Numbers
 
 (defun expand-number-range-check (object low high)
-  (cond ((both low high #'(lambda (x) (eql x '*)))
-         '(t))
-        ((both low high #'numberp)
+  (cond ((both low high #'numberp)
          `((<= ,low ,object ,high)))
         ((both low high #'consp) ; should be a singleton list of number
          `((< ,(car low) ,object ,(car high))))
@@ -290,9 +288,11 @@ object".
 
 (defmacro defopt-number (name predicate)
   `(define-typep-optimizer ,name (object &optional (low '*) (high '*))
-     (*let `(#1=#:object ,object)
-       (*and (list* `(,',predicate #1#)
-                    (expand-number-range-check '#1# low high))))))
+     (if (both low high (lambda (x) (eql x '*)))
+       `(,',predicate ,object)
+       (*let `(#1=#:object ,object)
+         (*and (list* `(,',predicate #1#)
+                      (expand-number-range-check '#1# low high)))))))
 
 (defopt-number integer integerp)
 (defopt-number float floatp)
@@ -304,10 +304,13 @@ object".
 
 ;; complex
 (define-typep-optimizer complex (object &optional (typespec '*))
-  (*let `(#1=#:object ,object)
-    (*and (list '(complexp #1#)
-                (if (eql typespec '*) t
-                  (optimize-typep-1 '(realpart #1#) typespec))))))
+  (if (eql typespec '*)
+    `(complexp ,object)
+    (*let `(#1=#:object ,object)
+      (*and (list '(complexp #1#)
+                  (if (eql typespec '*) t
+                    (optimize-typep-1 '(realpart #1#) typespec)))))))
+
 
 ;;; Arrays
 (defun expand-array-element-type-check (object element-type)
