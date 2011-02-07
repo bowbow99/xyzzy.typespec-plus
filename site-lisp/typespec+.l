@@ -271,6 +271,7 @@ object".
   (*let `(#:object ,object) nil))
 
 
+;;;
 ;;; Numbers
 
 (defun expand-number-range-check (object low high)
@@ -312,7 +313,9 @@ object".
                     (optimize-typep-1 '(realpart #1#) typespec)))))))
 
 
+;;;
 ;;; Arrays
+
 (defun expand-array-element-type-check (object element-type)
   (if (eql element-type '*) t
     `(eql (array-element-type ,object)
@@ -332,45 +335,38 @@ object".
   (if (eql size '*) t
     `(= (array-dimension ,object 0) ,size)))
 
-;; array [element-type] [dimension-spec]
-(define-typep-optimizer array (object &optional (element-type '*) (dimension-spec '*))
-  (*let `(#1=#:object ,object)
-    (*and (list* '(arrayp #1#)
-                 (expand-array-element-type-check '#1# element-type)
-                 (expand-array-dimension-check '#1# dimension-spec)))))
+(defmacro defopt-array (name predicate &rest opts)
+  (let ((args (mapcar (lambda (x) (intern (string x))) opts)))
+    `(define-typep-optimizer ,name (object &optional ,@(mapcar (lambda (x) `(,x '*)) args))
+       (if (every (lambda (x) (eql x '*)) (list ,@args))
+         `(,',predicate ,object)
+         (*let `(#1=#:object ,object)
+           (*and (list* `(,',predicate #1#)
+                        ,@(when (member :element-type opts)
+                            (list '(expand-array-element-type-check '#1# element-type)))
+                        ,@(when (member :size opts)
+                            (list '(expand-vector-size-check '#1# size)))
+                        ,(when (member :dimension-spec opts)
+                           '(expand-array-dimension-check '#1# dimension-spec)))))))))
 
+;; array  [element-type] [dimension-spec]
+(defopt-array array arrayp :element-type :dimension-spec)
 
-;; simple-array [element-type] [dimension-spec]
-(define-typep-optimizer simple-array (object &optional (element-type '*) (dimension-spec '*))
-  (*let `(#1=#:object ,object)
-    (*and (list* '(si:*simple-array-p #1#)
-                 (expand-array-element-type-check '#1# element-type)
-                 (expand-array-dimension-check '#1# dimension-spec)))))
+;; simple-array  [element-type] [dimension-spec]
+(defopt-array simple-array si:*simple-array-p :element-type :dimension-spec)
 
-;; vector [element-type] [size]
-(define-typep-optimizer vector (object &optional (element-type '*) (size '*))
-  (*let `(#1=#:object ,object)
-    (*and (list* '(vectorp #1#)
-                 (expand-array-element-type-check '#1# element-type)
-                 (expand-vector-size-check '#1# size)))))
+;; vector  [element-type] [size]
+(defopt-array vector vectorp :element-type :size)
 
-;; simple-vector [size]
-(define-typep-optimizer simple-vector (object &optional (size '*))
-  (*let `(#1=#:object ,object)
-    (*and (list* '(simple-vector-p #1#)
-                 (expand-vector-size-check '#1# size)))))
+;; simple-vector  [size]
+(defopt-array simple-vector simple-vector-p :size)
 
-;; string [size]
-(define-typep-optimizer string (object &optional (size '*))
-  (*let `(#1=#:object ,object)
-    (*and (list* '(stringp #1#)
-                 (expand-vector-size-check '#1# size)))))
+;; string  [size]
+(defopt-array string stringp :size)
 
-;; simple-string [size]
-(define-typep-optimizer simple-string (object &optional (size '*))
-  (*let `(#1=#:object ,object)
-    (*and (list* '(simple-string-p #1#)
-                 (expand-vector-size-check '#1# size)))))
+;; simple-string  [size]
+(defopt-array simple-string simple-string-p :size)
+
 
 ;;; * Function optimize-typep
 
