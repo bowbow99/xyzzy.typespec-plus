@@ -806,7 +806,7 @@
   (assert-optimize X (simple-vector) (simple-vector-p X))
   (assert-optimize X (simple-vector *) (simple-vector-p X))
   (assert-optimize X (simple-vector 3)
-    (and (simple-vector-p X) (eql (array-dimension X 0) 3)))
+    (and (simple-vector-p X) (= (array-dimension X 0) 3)))
   ;; optimization for expression
   (assert-optimize (foo x y z) simple-vector (simple-vector-p (foo x y z)))
   (assert-optimize (foo x y z) (simple-vector) (simple-vector-p (foo x y z)))
@@ -829,7 +829,7 @@
   (assert-optimize X (string) (stringp X))
   (assert-optimize X (string *) (stringp X))
   (assert-optimize X (string 3)
-    (and (stringp X) (eql (array-dimension X 0) 3)))
+    (and (stringp X) (= (array-dimension X 0) 3)))
   ;; optimization for expression
   (assert-optimize (foo x y z) string (stringp (foo x y z)))
   (assert-optimize (foo x y z) (string) (stringp (foo x y z)))
@@ -848,7 +848,7 @@
   (assert-optimize X (simple-string) (simple-string-p X))
   (assert-optimize X (simple-string *) (simple-string-p X))
   (assert-optimize X (simple-string 3)
-    (and (simple-string-p X) (eql (array-dimension X 0) 3)))
+    (and (simple-string-p X) (= (array-dimension X 0) 3)))
   ;; optimization for expression
   (assert-optimize (foo x y z) simple-string (simple-string-p (foo x y z)))
   (assert-optimize (foo x y z) (simple-string) (simple-string-p (foo x y z)))
