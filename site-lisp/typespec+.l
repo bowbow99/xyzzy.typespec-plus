@@ -25,7 +25,7 @@
 (export '(+original-typep-function+
           optimize-typep
           optimize-typep-1
-          typepred
+          ;typepred
           ;; configuration variables
           *typep-warn-on-undefined-typespec*
           *optimize-typep-warn-on-undefined-typespec*
@@ -406,8 +406,9 @@ object".
     form))
 
 ;;;;
-;;;; * Function `typepred`
-
+;;;; * Function/Macro `typepred`
+#|
+;; function version
 (defun typepred (typespec)
   "Return a function which takes one argument OBJECT and return true if the
 OBJECT is type of TYPESPEC."
@@ -419,7 +420,17 @@ OBJECT is type of TYPESPEC."
            (eql (second form) 'x))
       (car form))
      (t
+      ;; FIXME: `coerce` into function seems doesn't produce compiled function
       (coerce `(lambda (x) ,form) 'function)))))
+
+;; macro version
+(defmacro typepred (typespec)
+  (let ((form (optimize-typep '#1=#:object typespec)))
+    (if (and (= (length form) 2)
+             (eql (second form) '#1#))
+      `',(car form)
+      `(lambda (#1#) ,form))))
+|#
 
 (provide "typespec+")
 ;;; typespec+.l ends here.
