@@ -326,7 +326,7 @@ object".
              ,@(loop for n in dimension-spec
                      for i = 0 then (1+ i)
                  collect (if (eql n '*) t
-                           `(= (array-dimension object ,i) ,n)))))))
+                           `(= (array-dimension ,object ,i) ,n)))))))
 
 (defun expand-vector-size-check (object size)
   (if (eql size '*) t
