@@ -36,14 +36,6 @@ type specifier （型指定子）を便利に。
 
 大体2~5倍くらい速くなるようです。（コンパイル後）
 
-type specifier から関数生成
----------------------------
-type specifier から、受け取ったオブジェクトがその方かどうかを調べる関数を
-生成します。
-
-    (remove-if-not (typepred `(or function symbol)) ...)
-    ;; ≡(remove-if-not (lambda (x) (typep x '(or function symbol))) ...)
-
 インストール
 ============
 
