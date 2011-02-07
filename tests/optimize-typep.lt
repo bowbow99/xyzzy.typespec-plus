@@ -713,15 +713,149 @@
              (= (array-dimension #:object 2) 3)))))
 
 ;; vector  [ELEMENT-TYPE [SIZE]]
+(define-test vector
+  (assert-same vector)
+  (assert-same (vector))
+  (assert-same (vector *))
+  (assert-same (vector * *))
+  (progn ; element-type
+    (assert-same (vector t))
+    (assert-same (vector character))
+    (assert-same (vector fixnum)))
+  (progn ; length
+    (assert-same (vector * 0))
+    (assert-same (vector * 3))
+    (assert-same (vector t 3)))
+  (progn ; combination
+    (assert-same (vector character 3))
+    (assert-same (vector fixnum 3)))
+  ;; optimization for variable
+  (assert-optimize X vector (vectorp X))
+  (assert-optimize X (vector) (vectorp X))
+  (assert-optimize X (vector *) (vectorp X))
+  (assert-optimize X (vector * *) (vectorp X))
+  (progn ; element-type
+    (assert-optimize X (vector t)
+      (and (vectorp X) (eql (array-element-type X) 't)))
+    (assert-optimize X (vector character)
+      (and (vectorp X) (eql (array-element-type X) 'character)))
+    (assert-optimize X (vector fixnum)
+      (and (vectorp X) (eql (array-element-type X) 't))))
+  (progn ; length
+    (assert-optimize X (vector * 0)
+      (and (vectorp X) (= (array-dimension X 0) 0)))
+    (assert-optimize X (vector * 2)
+      (and (vectorp X) (= (array-dimension X 0) 2))))
+  (progn ; combination
+    (assert-optimize X (vector t 3)
+      (and (vectorp X)
+           (eql (array-element-type X) 't)
+           (= (array-dimension X 0) 3)))
+    (assert-optimize X (vector character 3)
+      (and (vectorp X)
+           (eql (array-element-type X) 'character)
+           (= (array-dimension X 0) 3))))
+  ;; optimization for expression
+  (assert-optimize (foo x y z) vector (vectorp (foo x y z)))
+  (assert-optimize (foo x y z) (vector) (vectorp (foo x y z)))
+  (assert-optimize (foo x y z) (vector *) (vectorp (foo x y z)))
+  (assert-optimize (foo x y z) (vector * *) (vectorp (foo x y z)))
+  (progn ; element-type
+    (assert-optimize (foo x y z) (vector t)
+      (let ((#:object (foo x y z)))
+        (and (vectorp #:object)
+             (eql (array-element-type #:object) 't))))
+    (assert-optimize (foo x y z) (vector character)
+      (let ((#:object (foo x y z)))
+        (and (vectorp #:object)
+             (eql (array-element-type #:object) 'character))))
+    (assert-optimize (foo x y z) (vector fixnum)
+      (let ((#:object (foo x y z)))
+        (and (vectorp #:object)
+             (eql (array-element-type #:object) 't)))))
+  (progn ; length
+    (assert-optimize (foo x y z) (vector * 2)
+      (let ((#:object (foo x y z)))
+        (and (vectorp #:object)
+             (= (array-dimension #:object 0) 2)))))
+  (progn ; combination
+    (assert-optimize (foo x y z) (vector t 2)
+      (let ((#:object (foo x y z)))
+        (and (vectorp #:object)
+             (eql (array-element-type #:object) 't)
+             (= (array-dimension #:object 0) 2))))
+    (assert-optimize (foo x y z) (vector character 12)
+      (let ((#:object (foo x y z)))
+        (and (vectorp #:object)
+             (eql (array-element-type #:object) 'character)
+             (= (array-dimension #:object 0) 12))))
+    (assert-optimize (foo x y z) (vector fixnum 33)
+      (let ((#:object (foo x y z)))
+        (and (vectorp #:object)
+             (eql (array-element-type #:object) 't)
+             (= (array-dimension #:object 0) 33))))))
+
 
 ;; simple-vector  [SIZE]
+(define-test simple-vector
+  (assert-same simple-vector)
+  (assert-same (simple-vector))
+  (assert-same (simple-vector *))
+  ;; optimization for variable
+  (assert-optimize X simple-vector (simple-vector-p X))
+  (assert-optimize X (simple-vector) (simple-vector-p X))
+  (assert-optimize X (simple-vector *) (simple-vector-p X))
+  (assert-optimize X (simple-vector 3)
+    (and (simple-vector-p X) (eql (array-dimension X 0) 3)))
+  ;; optimization for expression
+  (assert-optimize (foo x y z) simple-vector (simple-vector-p (foo x y z)))
+  (assert-optimize (foo x y z) (simple-vector) (simple-vector-p (foo x y z)))
+  (assert-optimize (foo x y z) (simple-vector *) (simple-vector-p (foo x y z)))
+  (assert-optimize (foo x y z) (simple-vector 3)
+    (let ((#:object (foo x y z)))
+      (and (simple-vector-p #:object) (= (array-dimension #:object 0) 3)))))
 
 ;;; NOTE: Not supported in xyzzy
 ;; bit-vector  [SIZE]
 ;; simple-bit-vector  [SIZE]
 
 ;; string  [SIZE]
+(define-test string
+  (assert-same string)
+  (assert-same (string))
+  (assert-same (string *))
+  ;; optimization for variable
+  (assert-optimize X string (stringp X))
+  (assert-optimize X (string) (stringp X))
+  (assert-optimize X (string *) (stringp X))
+  (assert-optimize X (string 3)
+    (and (stringp X) (eql (array-dimension X 0) 3)))
+  ;; optimization for expression
+  (assert-optimize (foo x y z) string (stringp (foo x y z)))
+  (assert-optimize (foo x y z) (string) (stringp (foo x y z)))
+  (assert-optimize (foo x y z) (string *) (stringp (foo x y z)))
+  (assert-optimize (foo x y z) (string 3)
+    (let ((#:object (foo x y z)))
+      (and (stringp #:object) (= (array-dimension #:object 0) 3)))))
+
 ;; simple-string  [SIZE]
+(define-test simple-string
+  (assert-same simple-string)
+  (assert-same (simple-string))
+  (assert-same (simple-string *))
+  ;; optimization for variable
+  (assert-optimize X simple-string (simple-string-p X))
+  (assert-optimize X (simple-string) (simple-string-p X))
+  (assert-optimize X (simple-string *) (simple-string-p X))
+  (assert-optimize X (simple-string 3)
+    (and (simple-string-p X) (eql (array-dimension X 0) 3)))
+  ;; optimization for expression
+  (assert-optimize (foo x y z) simple-string (simple-string-p (foo x y z)))
+  (assert-optimize (foo x y z) (simple-string) (simple-string-p (foo x y z)))
+  (assert-optimize (foo x y z) (simple-string *) (simple-string-p (foo x y z)))
+  (assert-optimize (foo x y z) (simple-string 3)
+    (let ((#:object (foo x y z)))
+      (and (simple-string-p #:object) (= (array-dimension #:object 0) 3)))))
 
 ;;; NOTE: Not supported in xyzzy
 ;; base-string  [SIZE]
