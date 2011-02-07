@@ -5,7 +5,7 @@ type specifier （型指定子）を便利に。
 関数 `typep` への変更
 ---------------------
 - `deftype` で定義した type specifier を使えるように
-- 未定義の type specifier だったら警告するように
+- 未定義の type specifier だったら警告できるように（設定で変更可能）
 
 型チェック式を最適化
 --------------------
@@ -14,25 +14,19 @@ type specifier （型指定子）を便利に。
 具体的に言うと `typecase`）で使うことを考えて作りました。
 詳しくは `optimize-typep` や `optimize-typep-1` のリファレンスを。
 
-    ;; `optimize-typep` がマクロ呼び出しの式を返すので `macroexpand` しています
-    (macroexpand (optimize-typep '(typep X 'string)))
+    (optimize-typep '(typep X 'string))
     => (stringp X)
-    => t
     
-    (macroexpand (optimize-typep '(typep X '(integer 0 100))))
-    => (if (integerp X)
-         (<= 0 X 100))
-    => t
+    (optimize-typep '(typep X '(integer 0 100)))
+    => (and (integerp X) (<= 0 X 100))
     
-    (macroexpand (optimize-typep-1 'X `(or function
-                                           (and symbol (satisfies fboundp)))))
-    => (let (#1=#:tem)
-         (if (setq #1# (typep X 'function))
-           #1#
-           ;; 手動で `macroexpand` してあります
-           (if (typep X 'symbol)
-             (fboundp X))))
-    => t
+    (optimize-typep-1 'X '(or string symbol))
+    => (or (stringp X) (symbolp X))
+    
+    (optimize-typep-1 'X `(or function
+                              (and symbol (satisfies fboundp))))
+    => (or (functionp X)
+           (and (symbolp X) (fboundp X)))
 
 大体2~5倍くらい速くなるようです。（コンパイル後）
 
@@ -50,9 +44,8 @@ NetInstaller から
 使い方（開発者向け）
 ===================
 `typep` への変更は（上書きしているので）読み込んだだけで有効になります。
-`optimize-typep` や `typepred` は typespec+ パッケージから `export`　してある
-ので、必要に応じて `use-package` するかパッケージプレフィックス付きで指定して
-ください。
+`optimize-typep` は typespec+ パッケージから `export`　してあるので、必要に応じて
+`use-package` するかパッケージプレフィックス付きで指定してください。
 
     ;; たぶん `optimize-typep` とかを使うマクロを定義するのだろう、ってことで
     ;; `eval-when` してます。
