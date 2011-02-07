@@ -1,3 +1,11 @@
+2011-02-07  bowbow99  <bowbow99@gamil.com>
+	* テストたくさん書いた
+	* あちこち bug 潰した
+	* array の optimizer を定義するマクロ追加
+	* `typepred` を一旦削除（コメントアウト）
+	- 使い方がイメージできなくて、関数がいいのかマクロでいいのか判断
+	  付かないので
+
 2011-02-04  bowbow99  <bowbow99@gmail.com>
 	* typep optimizer 必要そうなの全部実装
 	- lisp/typespec.l で `defpred` されてるもの
