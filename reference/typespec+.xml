@@ -45,10 +45,11 @@
 </chapter>
 
 
+
 <chapter>
 <title>optimize-type-check</title>
 <type>Function</type>
-<arguments>optimize-typep-1 OBJECT-FORM TYPESPEC</arguments>
+<arguments>optimize-type-check OBJECT-FORM TYPESPEC</arguments>
 <package>typespec+</package>
 <description>
 OBJECT-FORM の値が TYPESPEC の型かどうか判断する式を作って返します。
