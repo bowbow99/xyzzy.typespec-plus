@@ -34,14 +34,14 @@
   `(dolist (#1=#:object *example-objects*)
      (assert-equality #'logically-equal
          (typep #1# ',typespec)
-         ,(optimize-typep-1 '#1# typespec)
+         ,(optimize-type-check '#1# typespec)
        #1# ',typespec)))
 
 
 (defmacro assert-optimize (object-form typespec optimized)
   `(assert-equality #'form-equal
        ',optimized
-       (optimize-typep-1 ',object-form ',typespec)))
+       (optimize-type-check ',object-form ',typespec)))
 #+xyzzy
 (setf (get 'assert-optimize 'ed:lisp-indent-hook) 2)
 

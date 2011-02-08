@@ -24,7 +24,7 @@
 
 (export '(+original-typep-function+
           optimize-typep
-          optimize-typep-1
+          optimize-type-check
           ;typepred
           ;; configuration variables
           *typep-warn-on-undefined-typespec*
@@ -229,7 +229,7 @@ object".
 ;; not
 (define-typep-optimizer not (object typespec)
   (*let `(#1=#:object ,object)
-    (let ((optimized (optimize-typep-1 '#1# typespec)))
+    (let ((optimized (optimize-type-check '#1# typespec)))
       (cond ((eql optimized t) nil)
             ((eql optimized nil) t)
             (t `(not ,optimized))))))
@@ -241,7 +241,7 @@ object".
     (*let `(#:object ,object) t)
     (*let `(#1=#:object ,object)
       (*and (mapcar (lambda (typespec)
-                      (optimize-typep-1 '#1# typespec))
+                      (optimize-type-check '#1# typespec))
               typespecs)))))
 
 ;; or
@@ -251,7 +251,7 @@ object".
     (*let `(#1=#:object ,object)
       (apply #'*or
              (mapcar (lambda (typespec)
-                       (optimize-typep-1 '#1# typespec))
+                       (optimize-type-check '#1# typespec))
                typespecs)))))
 
 ;; standard-char
@@ -304,7 +304,7 @@ object".
     (*let `(#1=#:object ,object)
       (*and (list '(complexp #1#)
                   (if (eql typespec '*) t
-                    (optimize-typep-1 '(realpart #1#) typespec)))))))
+                    (optimize-type-check '(realpart #1#) typespec)))))))
 
 
 ;;;
@@ -364,8 +364,8 @@ object".
 
 ;;; * Function optimize-typep
 
-(defun optimize-typep-1 (object-form typespec
-                         &optional (no-warn (null *optimize-typep-warn-on-undefined-typespec*)))
+(defun optimize-type-check (object-form typespec
+                            &optional (no-warn (null *optimize-typep-warn-on-undefined-typespec*)))
   (multiple-value-bind (type args)
       (if (consp typespec)
         (values (car typespec) (cdr typespec))
@@ -382,7 +382,7 @@ object".
           (and (si:*structurep #1#)
                (si:*structure-subtypep (si:*structure-definition #1#) ,it))))
       ((get type 'si::deftype-definition)
-       (optimize-typep-1 object-form (si:canonicalize-type typespec)))
+       (optimize-type-check object-form (si:canonicalize-type typespec)))
       (t
        (unless no-warn
          (warn "type specifier ‚¶‚á‚È‚¢‚Ý‚½‚¢: ~S" typespec))
