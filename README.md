@@ -51,11 +51,10 @@ type specifier （型指定子）を便利に。
 
 NetInstaller から
 -----------------
-<del>[カフェイン中毒][1] からどうぞ</del>
+[カフェイン中毒][1] からどうぞ
 
   [1]: http://bowbow99.sakura.ne.jp/xyzzy/packages.l
 
-しばしお待ちを。
 
 使い方（開発者向け）
 ===================
@@ -73,11 +72,9 @@ NetInstaller から
 注意点、既知の問題など
 ======================
 - 関数 `typep` を上書きしています
-- （特にエンドユーザには）警告がやかましいかも
 
 バグ報告、質問、要望などは [GitHub Issues][GH-Issues] か [@bowbow99][twitter] あたりへ
 お願いします。
 
   [GH-Issues]: http://github.com/bowbow99/xyzzy.typespec-plus/issues
   [twitter]: http://twitter.com/bowbow99/
-
