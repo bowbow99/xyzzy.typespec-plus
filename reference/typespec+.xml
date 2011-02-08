@@ -57,16 +57,16 @@
 
 使用例:
   (typepred string)
-  => #<function: stringp>
+  =&gt; #&lt;function: stringp&gt;
   
   (typepred (or string symbol))
   ;; == (lambda (#1=#:object) (or (stringp #1#) (symbolp #1#)))
-  => #<lexical-closure: (anonymous)>
+  =&gt; #&lt;lexical-closure: (anonymous)&gt;
   
   (remove-if-not (typepred (or function
                                (and symbol (satisfies fboundp))))
     (list 'list 'symbol (lambda (x) x) (typepred fixnum)))
-  => (list #<lexical-closure: (anonymous)> #<function: *fixnump>)
+  =&gt; (list #&lt;lexical-closure: (anonymous)&gt; #&lt;function: *fixnump&gt;)
 
 </description>
 <seealso>typep</seealso>
