@@ -387,7 +387,7 @@ object".
 ;;;; * Macro `typepred`
 (defmacro typepred (typespec)
   "Create a function which takes an object and return true if the object is type of TYPESPEC."
-  (let ((form (optimize-typep '#1=#:object typespec)))
+  (let ((form (optimize-type-check '#1=#:object typespec)))
     (if (and (= (length form) 2)
              (eql (second form) '#1#))
       `',(car form)
