@@ -1,3 +1,11 @@
+2011-02-08  bowbow99  <bowbow99@gmail.com>  version 0.01.00
+	* `optimize-typep-1` を `optimize-type-check` に改名
+	* `optimize-typep` を削除
+	* デフォルトで未定義の typespec を使っても警告を発しないように
+	* `typepred` 復活（マクロ）
+	- ほとんどの場合はマクロで問題ないと思ったので
+	- 「関数の方が便利」という場面に遭遇したらまた考える
+
 2011-02-07  bowbow99  <bowbow99@gamil.com>
 	* テストたくさん書いた
 	* あちこち bug 潰した
