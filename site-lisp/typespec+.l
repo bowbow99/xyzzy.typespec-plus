@@ -390,7 +390,7 @@ object".
   (let ((form (optimize-type-check '#1=#:object typespec)))
     (if (and (= (length form) 2)
              (eql (second form) '#1#))
-      `',(car form)
+      `#',(car form)
       `(lambda (#1#) ,form))))
 
 (provide "typespec+")
