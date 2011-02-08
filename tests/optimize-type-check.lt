@@ -1,6 +1,6 @@
-;;; -*- mode: lisp; package: test.optimize-typep -*-
+;;; -*- mode: lisp; package: test.optimize-type-check -*-
 ;;;
-;;; tests/optimize-typep.lt
+;;; tests/optimize-type-check.lt
 ;;;
 
 ;;; Code:
@@ -8,12 +8,12 @@
 (require "typespec+")
 (require "lisp-unit")
 
-(defpackage :test.optimize-typep
+(defpackage :test.optimize-type-check
   (:use :lisp :lisp-unit :typespec+))
 
-(in-package :test.optimize-typep)
+(in-package :test.optimize-type-check)
 
-(remove-all-tests :test.optimize-typep)
+(remove-all-tests :test.optimize-type-check)
 
 (defparameter *example-objects*
   `(t
@@ -1045,4 +1045,4 @@
 ;; method
 
 
-;;; tests/optimize-typep.lt ends here.
+;;; tests/optimize-type-check.lt ends here.
