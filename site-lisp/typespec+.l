@@ -62,12 +62,6 @@
 ;;;;
 ;;;; * Utilities
 
-(defmacro awhen (test-form &body body)
-  `(let ((it ,test-form))
-     (if it (progn ,@body))))
-#+xyzzy
-(setf (get 'awhen 'ed:lisp-indent-hook) 1)
-
 (defmacro acond (&rest clauses)
   (labels ((expand-clauses (clauses)
              (cond ((null clauses) nil)
