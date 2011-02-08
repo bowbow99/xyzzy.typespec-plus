@@ -55,7 +55,7 @@
 (defparameter *typep-warn-on-undefined-typespec* nil
   "If non-nil, warn when undefined typespec used on `type`.")
 
-(defparameter *optimize-type-check-warn-on-undefined-typespec* t
+(defparameter *optimize-type-check-warn-on-undefined-typespec* nil
   "If non-nil, warn when undefined typespec given to `optimize-type-check`")
 
 ;;;;
