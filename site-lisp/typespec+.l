@@ -12,7 +12,7 @@
 
 ;;; Code:
 
-(eval-when (:load-toplevel :compile-toplevel :execute)
+(eval-when (:compile-toplevel :execute)
   (require "cmu_loop"))
 
 (defpackage :typespec+
