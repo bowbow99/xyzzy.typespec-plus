@@ -44,7 +44,34 @@
 <file>typespec+.l</file>
 </chapter>
 
+<chapter>
+<title>typepred</title>
+<type>Macro</type>
+<arguments>typepred  TYPESPEC</arguments>
+<package>typespec+</package>
+<description>
+受け取ったオブジェクトが TYPESPEC を満たすか判別する関数を返します。
 
+引数:
+  TYPESPEC : 型指定子
+
+使用例:
+  (typepred string)
+  => #<function: stringp>
+  
+  (typepred (or string symbol))
+  ;; == (lambda (#1=#:object) (or (stringp #1#) (symbolp #1#)))
+  => #<lexical-closure: (anonymous)>
+  
+  (remove-if-not (typepred (or function
+                               (and symbol (satisfies fboundp))))
+    (list 'list 'symbol (lambda (x) x) (typepred fixnum)))
+  => (list #<lexical-closure: (anonymous)> #<function: *fixnump>)
+
+</description>
+<seealso>typep</seealso>
+<file>typespec+.l</file>
+</chapter>
 
 <chapter>
 <title>optimize-type-check</title>
