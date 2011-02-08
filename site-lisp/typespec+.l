@@ -1,6 +1,6 @@
 ;;; -*- mode: lisp; package: typespec+ -*-
 ;;;
-;;; typespec+.l --- type specifier をもっと使いやすく
+;;; typespec+.l --- type specifier （型指定子）を便利に
 ;;;
 ;;; Author: bowbow99 <bowbow99@gmail.com>
 ;;; Version: 0.00.00
