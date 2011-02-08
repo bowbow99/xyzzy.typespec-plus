@@ -23,7 +23,6 @@
 (defconstant +original-typep-function+ #'typep)
 
 (export '(+original-typep-function+
-          optimize-typep
           optimize-type-check
           ;typepred
           ;; configuration variables
@@ -387,17 +386,6 @@ object".
        (unless no-warn
          (warn "type specifier ‚¶‚á‚È‚¢‚Ý‚½‚¢: ~S" typespec))
        `(typep ,object-form ',typespec)))))
-
-(defun optimize-typep (form)
-  "Take a `typep` form and return a form that do same thing but in more efficiently."
-  (unless (and (consp form)
-               (eq (car form) 'typep)
-               (= (length form) 3))
-    (error "Invalid typep form: ~S" form))
-  (if (and (consp (third form))
-           (eql (car (third form)) 'quote))
-    (optimize-typep-1 (second form) (cadr (third form)) t)
-    form))
 
 ;;;;
 ;;;; * Function/Macro `typepred`
