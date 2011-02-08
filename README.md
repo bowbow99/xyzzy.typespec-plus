@@ -30,6 +30,22 @@ type specifier （型指定子）を便利に。
 
 大体2~5倍くらい速くなるようです。（コンパイル後）
 
+型チェックをする関数
+--------------------
+引数が指定された型指定子を満たすか判別する関数を返すマクロを用意しました。
+
+    (typepred string)
+    => #<function: stringp>
+    
+    (typepred (or string symbol))
+    ;; == (lambda (#1=#:object) (or (stringp #1#) (symbolp #1#)))
+    => #<lexical-closure: (anonymous)>
+    
+    (remove-if-not (typepred (or function
+                                 (and symbol (satisfies fboundp))))
+      (list 'list 'symbol (lambda (x) x) (typepred fixnum)))
+    => (list #<lexical-closure: (anonymous)> #<function: *fixnump>)
+
 インストール
 ============
 
