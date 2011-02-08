@@ -26,8 +26,7 @@
           optimize-type-check
           ;typepred
           ;; configuration variables
-          *typep-warn-on-undefined-typespec*
-          *optimize-typep-warn-on-undefined-typespec*
+          *warn-on-undefined-typespec*
           ))
 
 #| Original Definition of `typep`
@@ -52,11 +51,8 @@
 ;;;;
 ;;;; * User Configuration
 
-(defparameter *typep-warn-on-undefined-typespec* nil
-  "If non-nil, warn when undefined typespec used on `type`.")
-
-(defparameter *optimize-type-check-warn-on-undefined-typespec* nil
-  "If non-nil, warn when undefined typespec given to `optimize-type-check`")
+(defparameter *warn-on-undefined-typespec* nil
+  "If non-nil, warn when undefined typespec used on `typep` or `optimize-type-check.")
 
 ;;;;
 ;;;; * Utilities
@@ -364,7 +360,7 @@ object".
 ;;; * Function optimize-typep
 
 (defun optimize-type-check (object-form typespec
-                            &optional (no-warn (null *optimize-type-check-warn-on-undefined-typespec*)))
+                            &optional (no-warn (null *warn-on-undefined-typespec*)))
   (multiple-value-bind (type args)
       (if (consp typespec)
         (values (car typespec) (cdr typespec))
