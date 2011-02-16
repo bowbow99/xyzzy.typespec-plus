@@ -189,7 +189,7 @@ object".
       ((get type 'si::deftype-definition)
        (typep object (si:canonicalize-type typespec)))
       (t
-       (when *typep-warn-on-undefined-typespec*
+       (when *warn-on-undefined-typespec*
          (warn "type specifier ‚¶‚á‚È‚¢‚Ý‚½‚¢: ~S" typespec))
        nil))))
 
