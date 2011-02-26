@@ -12,6 +12,7 @@
 <!ELEMENT section (#PCDATA)>
 <!ELEMENT file (#PCDATA)>
 ]>
+<!--  License: MIT (see COPYING.mit)  -->
 <!--
   へなちょこリファレンスと合わせて、info-modoki-mode とかで使えるリファレンス
   を作る方法:
