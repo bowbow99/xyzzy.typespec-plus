@@ -3,10 +3,10 @@
 ;;; typespec+.l --- type specifier （型指定子）を便利に
 ;;;
 ;;; Author: bowbow99 <bowbow99@gmail.com>
-;;; Version: 0.01.01
+;;; Version: 0.01.02
 ;;; Category: Lisp Libraries
 ;;; Depends:
-;;; License: MIT (see COPYING)
+;;; License: MIT (see COPYING.mit)
 ;;; Commentary: (see README.md)
 ;;; ChangeLog: (see ChangeLog)
 
@@ -22,7 +22,7 @@
 
 (defconstant +original-typep-function+ #'typep)
 
-(defconstant +version+ "0.01.01")
+(defconstant +version+ "0.01.02")
 
 (export '(+original-typep-function+
           optimize-type-check
@@ -189,7 +189,7 @@ object".
       ((get type 'si::deftype-definition)
        (typep object (si:canonicalize-type typespec)))
       (t
-       (when *typep-warn-on-undefined-typespec*
+       (when *warn-on-undefined-typespec*
          (warn "type specifier じゃないみたい: ~S" typespec))
        nil))))
 

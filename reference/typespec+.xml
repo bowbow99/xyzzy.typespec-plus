@@ -12,9 +12,10 @@
 <!ELEMENT section (#PCDATA)>
 <!ELEMENT file (#PCDATA)>
 ]>
+<!--  License: MIT (see COPYING.mit)  -->
 <!--
-  へなちょこリファレンスと合わせて、info-modoki-mode とかで使えるリファレンス
-  を作る方法:
+  へなちょこリファレンスと合わせて、info-modoki-mode とかで使えるリファ
+  レンスを作る方法:
   
   必要なもの
   - xy-reference
@@ -24,8 +25,8 @@
   (require :xy-reference)
   (xy-refernec:2txt)
   
-  すると ${XYZZY}/etc/reference.txt が生成されるので、info-modoki-mode の
-  imm-refer で "symbol-macrolet" が見れるようになるはず。
+  すると ${XYZZY}/etc/reference.txt が生成されるので、info-modoki-mode
+  から見れるようになるはず。
   -->
 <book>
 
@@ -70,6 +71,7 @@
 
 </description>
 <seealso>typep</seealso>
+<section>関数</section>
 <file>typespec+.l</file>
 </chapter>
 
