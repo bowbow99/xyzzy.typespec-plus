@@ -1,3 +1,6 @@
+2011-02-26  bowbow99  <bowbow99@gmail.com>  version 0.01.02
+	* リファレンスにもライセンス表示を付けておいた
+
 2011-02-17  bowbow99  <bowbow99@gmail.com>
 	* Fix: typep に古い変数名が残ってたのを修正
 
