@@ -6,7 +6,7 @@
 ;;; Version: 0.01.01
 ;;; Category: Lisp Libraries
 ;;; Depends:
-;;; License: MIT (see COPYING)
+;;; License: MIT (see COPYING.mit)
 ;;; Commentary: (see README.md)
 ;;; ChangeLog: (see ChangeLog)
 
