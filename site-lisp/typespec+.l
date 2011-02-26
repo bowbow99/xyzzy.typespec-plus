@@ -3,7 +3,7 @@
 ;;; typespec+.l --- type specifier （型指定子）を便利に
 ;;;
 ;;; Author: bowbow99 <bowbow99@gmail.com>
-;;; Version: 0.01.00
+;;; Version: 0.01.01
 ;;; Category: Lisp Libraries
 ;;; Depends:
 ;;; License: MIT (see COPYING)
@@ -22,7 +22,7 @@
 
 (defconstant +original-typep-function+ #'typep)
 
-(defconstant +version+ "0.01.00")
+(defconstant +version+ "0.01.01")
 
 (export '(+original-typep-function+
           optimize-type-check
