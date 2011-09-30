@@ -1,3 +1,7 @@
+[xyzzy.ansify] に取り込まれました。今後はそっちでメンテされるのでこっちは放置になります。
+
+  [xyzzy.ansify]: http://github.com/bowbow99/xyzzy.ansify
+
 これは何
 ========
 type specifier （型指定子）を便利に。
